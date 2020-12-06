@@ -3,3 +3,4 @@ package.json
 .vscode/*.*
 .eslintrc.json
 README.md
+/config/*.yaml

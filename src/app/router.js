@@ -1,8 +1,8 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('./controller/attribute.controller');
+// const controller = require('./controller/attribute.controller');
 
-router.get('/get_attributes', controller.getAttribute);
+router.get('/get_attributes');
 
 module.exports = router;

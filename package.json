@@ -2,9 +2,10 @@
   "name": "completely-project",
   "version": "1.0.0",
   "description": "Config project Nodejs",
-  "main": "bootstrap.js",
+  "main": "src/bootstrap.js",
   "scripts": {
     "dev": "NODE_ENV=development nodemon src/bootstrap.js",
+    "windows-dev": "SET NODE_ENV=development&nodemon --inspect",
     "lint": "eslint ./"
   },
   "husky": {
@@ -50,13 +51,13 @@
   "dependencies": {
     "ajv": "^6.10.2",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "config": "^3.3.3",
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
+    "http-errors": "^1.8.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.3.2",
-    "morgan": "^1.9.1",
-    "mysql2": "^1.7.0",
-    "sequelize": "^5.18.4",
-    "sequelize-cli": "^5.5.1"
+    "morgan": "^1.9.1"
   }
 }
