@@ -34,4 +34,8 @@ module.exports = {
     new createError(400, 'user does not validate email', {
       errors: [{ code: 7006, message: 'User does not validate email' }],
     }),
+  codeDoesNotMatch: () =>
+    new createError(400, 'code does not match', {
+      errors: [{ code: 7007, message: 'code does not match' }],
+    }),
 };

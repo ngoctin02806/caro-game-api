@@ -19,24 +19,6 @@ module.exports.login = async (req, res, next) => {
     if (!user.value)
       return res.status(400).json(httpErrorsHelper.userNotExist());
 
-    if (!user.value.is_verified) {
-      const verifiedCode = shortid.generate();
-
-      const result = await userService.updateVerifiedCode(
-        user.value._id, // eslint-disable-line
-        verifiedCode
-      );
-
-      if (result.value instanceof Error) throw result.value;
-
-      onSendEmailEvent.next({
-        email: user.value.email,
-        verified_code: verifiedCode,
-      });
-
-      return res.status(400).json(httpErrorsHelper.userDoesNotValidateEmail());
-    }
-
     const comparePassword = await bcryptjsHelper.comparePassword(
       password,
       user.value.password
@@ -116,6 +98,57 @@ module.exports.register = async (req, res, next) => {
           token,
           expire_in: 3 * 60 * 60 * 1000, // 3h
         },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.activateAccount = async (req, res, next) => {
+  try {
+    const { code } = req.body;
+    const { _id } = req.user;
+
+    const user = await userService.getUserById(_id);
+
+    if (user.value instanceof Error) throw user.value;
+
+    if (user.value.verified_code !== code)
+      return res.status(400).json(httpErrorsHelper.codeDoesNotMatch());
+
+    const result = await userService.updateOne({ _id }, { is_verified: true });
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({
+      data: {
+        message: 'Activate successfully',
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getVerifiedCode = async (req, res, next) => {
+  try {
+    const { _id, email } = req.user;
+
+    const verifiedCode = shortid.generate();
+
+    const result = await userService.updateOne(
+      { _id },
+      { verified_code: verifiedCode }
+    );
+
+    if (result.value instanceof Error) throw result.value;
+
+    onSendEmailEvent.next({ email, verified_code: verifiedCode });
+
+    return res.status(200).json({
+      data: {
+        message: 'Send mail successfully',
       },
     });
   } catch (error) {

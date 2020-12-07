@@ -31,3 +31,13 @@ module.exports.register = {
   },
   required: ['email', 'password', 'username'],
 };
+
+module.exports.activeCode = {
+  type: 'object',
+  properties: {
+    code: {
+      type: 'string',
+    },
+  },
+  required: ['code'],
+};

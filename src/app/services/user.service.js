@@ -61,9 +61,26 @@ const updateVerifiedCode = async (userId, code) => {
   }
 };
 
+const updateOne = async (condition, payload) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.updateOne(
+      { ...condition },
+      { $set: { ...payload } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
   insertUser,
   updateVerifiedCode,
+  updateOne,
 };
