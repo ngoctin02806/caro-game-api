@@ -2,6 +2,9 @@ const shortid = require('shortid');
 const generateSafeId = require('generate-safe-id');
 
 const { onSendEmailEvent } = require('../../event/onSendEmail.event'); // eslint-disable-line
+const {
+  onRequestChangePassword,
+} = require('../../event/onRequestChangePassword.event');
 const userService = require('../services/user.service');
 const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 const bcryptjsHelper = require('../../lib/bcryptjs');
@@ -149,6 +152,40 @@ module.exports.getVerifiedCode = async (req, res, next) => {
     return res.status(200).json({
       data: {
         message: 'Send mail successfully',
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.sendMailToChangePassword = async (req, res, next) => {
+  try {
+    const { email, host_fe, path_name } = req.body; // eslint-disable-line
+
+    const user = await userService.getUserByEmail(email);
+
+    if (user.value instanceof Error) throw user.value;
+
+    if (!user.value)
+      return res.status(400).json(httpErrorsHelper.userNotExist());
+
+    const signature = await jwtHelper.sign({
+      _id: user.value._id, // eslint-disable-line
+      email: user.value.email,
+    });
+
+    onRequestChangePassword.next({
+      email: user.value.email,
+      username: user.value.username,
+      signature,
+      host_fe,
+      path_name,
+    });
+
+    return res.status(200).json({
+      data: {
+        message: 'Send message successfully',
       },
     });
   } catch (error) {

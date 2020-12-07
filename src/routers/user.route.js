@@ -25,5 +25,10 @@ router.post(
   authMiddleware,
   userController.getVerifiedCode
 );
+router.post(
+  '/me/account/password/reset',
+  validator(schema.changePasswordThroughEmail),
+  userController.sendMailToChangePassword
+);
 
 module.exports = router;

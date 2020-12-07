@@ -41,3 +41,21 @@ module.exports.activeCode = {
   },
   required: ['code'],
 };
+
+module.exports.changePasswordThroughEmail = {
+  type: 'object',
+  properties: {
+    email: {
+      type: 'string',
+      regexp:
+        '/^(([^<>()[]\\.,;:s@"]+(.[^<>()[]\\.,;:s@"]+)*)|(".+"))@(([[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}])|(([a-zA-Z-0-9]+.)+[a-zA-Z]{2,}))$/',
+    },
+    host_fe: {
+      type: 'string',
+    },
+    path_name: {
+      type: 'string',
+    },
+  },
+  required: ['email', 'host_fe', 'path_name'],
+};
