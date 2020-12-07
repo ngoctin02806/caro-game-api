@@ -5,7 +5,7 @@ const morgan = require('morgan');
 const config = require('config');
 const bodyParser = require('body-parser');
 
-const router = require('../app/router');
+const router = require('../routers/index');
 const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 const app = express();
@@ -21,7 +21,7 @@ module.exports = () =>
       // parse application/json
       app.use(bodyParser.json());
 
-      app.use(router);
+      app.use('/api/v1', router);
 
       /* Catch 404 Not Found */
       app.use((req, res, next) => {
