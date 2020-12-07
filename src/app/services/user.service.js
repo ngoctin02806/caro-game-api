@@ -30,7 +30,40 @@ const getUserById = async id => {
   }
 };
 
+const insertUser = async data => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const user = await collection.insertOne({
+      ...data,
+    });
+
+    return Promise.resolve(Result.Ok(get(user, 'ops.0')));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const updateVerifiedCode = async (userId, code) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.updateOne(
+      { _id: userId },
+      { $set: { verified_code: code } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
+  insertUser,
+  updateVerifiedCode,
 };

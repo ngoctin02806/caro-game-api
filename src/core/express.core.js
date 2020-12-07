@@ -34,7 +34,11 @@ module.exports = () =>
       app.use((error, req, res, next) => {
         return res
           .status(error.status || 500)
-          .json(httpErrorsHelper.notFound());
+          .json(
+            error.status
+              ? httpErrorsHelper.notFound()
+              : httpErrorsHelper.internalError(error.message)
+          );
       });
 
       app.listen(
