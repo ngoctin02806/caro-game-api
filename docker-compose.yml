@@ -1,4 +1,4 @@
-version: '3.8';
+version: '3.8'
 services: 
   web_api:
     restart: always
@@ -23,8 +23,6 @@ services:
       - MONGO_URL=${MONGO_URL}
     depends_on: 
       - mongo
-    networks:
-      - "my-cicd-network"
   mongo:
     image: mongo
     container_name: 'mongo-db'
@@ -36,8 +34,6 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
-    networks:
-      - "my-cicd-network"
 networks:
   default:
     external:
