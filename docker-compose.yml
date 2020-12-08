@@ -1,0 +1,42 @@
+version: '3.8';
+services: 
+  web_api:
+    restart: always
+    container_name: 'caro-game-api'
+    build:
+      context: '.'
+    image: ngoctin02806/caro-game-api
+    ports:
+      - "8010:8000"
+      - "8011:8000"
+    environment: 
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - GMAIL_REFRESH_TOKEN=${GMAIL_REFRESH_TOKEN}
+      - GMAIL_ACCESS_TOKEN=${GMAIL_ACCESS_TOKEN}
+      - GOOGLE_APP_CLIENT_ID=${GOOGLE_APP_CLIENT_ID}
+      - GOOGLE_APP_CLIENT_SECRET=${GOOGLE_APP_CLIENT_SECRET}
+      - FACEBOOK_APP_CLIENT_ID=${FACEBOOK_APP_CLIENT_ID}
+      - FACEBOOK_APP_CLIENT_SECRET=${FACEBOOK_APP_CLIENT_SECRET}
+      - VIRTUAL_HOST=api.hcmusedu.info
+      - VIRTUAL_PORT=8000
+      - MONGO_URL=${MONGO_URL}
+    depends_on: 
+      - mongo
+    networks:
+      - "my-cicd-network"
+  mongo:
+    image: mongo
+    container_name: 'mongo-db'
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - "my-cicd-network"
+networks:
+  default:
+    external:
+      name: my-cicd-network
