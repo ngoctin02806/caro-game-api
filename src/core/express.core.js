@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const express = require('express');
 const morgan = require('morgan');
+const cors = require('cors');
 const config = require('config');
 const bodyParser = require('body-parser');
 const passport = require('passport');
@@ -29,6 +30,8 @@ module.exports = () =>
   new Promise((resolve, reject) => {
     try {
       app.use(morgan('dev'));
+
+      app.use(cors());
 
       app.use(passport.initialize());
 
