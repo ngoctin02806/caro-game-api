@@ -42,4 +42,13 @@ router.post(
   userController.googleLogin
 );
 
+router.post(
+  '/me/facebook/login',
+  passport.authenticate('facebook-token', {
+    session: false,
+    scope: ['email', 'profile'],
+  }),
+  userController.facebookLogin
+);
+
 module.exports = router;

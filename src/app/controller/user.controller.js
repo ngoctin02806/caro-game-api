@@ -13,6 +13,7 @@ const { USER_ROLE } = require('../constants/role.constant');
 const {
   LOCAL_PROVIDER,
   GOOGLE_PROVIDER,
+  FACEBOOK_PROVIDER,
 } = require('../constants/provider.constant');
 
 module.exports.login = async (req, res, next) => {
@@ -217,6 +218,74 @@ module.exports.googleLogin = async (req, res, next) => {
         avatar: user._json.picture, // eslint-disable-line
         provider: GOOGLE_PROVIDER,
         role: USER_ROLE,
+        ref_id: user.id,
+        is_verified: true,
+      });
+
+      if (newUser.value instanceof Error) throw newUser.value;
+
+      const token = await jwtHelper.sign({
+        _id: newUser.value._id, // eslint-disable-line
+        email: newUser.value.email,
+        _role: newUser.value.role,
+      });
+
+      return res.status(201).json({
+        data: {
+          user: {
+            ...newUser.value,
+          },
+          auth: {
+            token,
+            expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+          },
+        },
+      });
+    }
+
+    const token = await jwtHelper.sign({
+      _id: existUser.value._id, // eslint-disable-line
+      email: existUser.value.email,
+      _role: existUser.value.role,
+    });
+
+    return res.status(200).json({
+      data: {
+        user: {
+          ...existUser.value,
+        },
+        auth: {
+          token,
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.facebookLogin = async (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const existUser = await userService.getUserByEmail(
+      user.emails[0].value,
+      FACEBOOK_PROVIDER
+    );
+
+    if (existUser.value instanceof Error) throw existUser.value;
+
+    if (!existUser.value) {
+      const newUser = await userService.insertUser({
+        _id: generateSafeId(),
+        username: user.displayName,
+        email: user.emails[0].value,
+        avatar: user.photos[0].value, // eslint-disable-line
+        provider: FACEBOOK_PROVIDER,
+        role: USER_ROLE,
+        ref_id: user.id,
+        is_verified: true,
       });
 
       if (newUser.value instanceof Error) throw newUser.value;
