@@ -1,8 +1,8 @@
 require('dotenv').config();
 
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
+// const fs = require('fs');
+// const path = require('path');
+// const https = require('https');
 
 const express = require('express');
 const morgan = require('morgan');
@@ -17,13 +17,13 @@ const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 const app = express();
 
-const server = https.createServer(
-  {
-    key: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.key')),
-    cert: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.cert')),
-  },
-  app
-);
+// const server = https.createServer(
+//   {
+//     key: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.key')),
+//     cert: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.cert')),
+//   },
+//   app
+// );
 
 module.exports = () =>
   new Promise((resolve, reject) => {
@@ -58,7 +58,7 @@ module.exports = () =>
           );
       });
 
-      server.listen(
+      app.listen(
         process.env.NODE_ENV === 'development' ? config.get('PORT') : 3000,
         () => {
           /* eslint-disable-next-line */
