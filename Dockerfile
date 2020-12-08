@@ -8,7 +8,7 @@ COPY ./package*.json ./
 
 RUN npm install --production
 
-COPY ./src ./
+COPY . .
 
 EXPOSE 8000
 
