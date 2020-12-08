@@ -5,11 +5,11 @@ const mongo = require('../../core/mongo.core');
 
 const COLLECTION = 'users';
 
-const getUserByEmail = async email => {
+const getUserByEmail = async (email, provider) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
-    const user = await collection.findOne({ email });
+    const user = await collection.findOne({ email, provider });
 
     return Promise.resolve(Result.Ok(user));
   } catch (error) {

@@ -10,12 +10,16 @@ const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 const bcryptjsHelper = require('../../lib/bcryptjs');
 const jwtHelper = require('../../lib/jwtHelper');
 const { USER_ROLE } = require('../constants/role.constant');
+const {
+  LOCAL_PROVIDER,
+  GOOGLE_PROVIDER,
+} = require('../constants/provider.constant');
 
 module.exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await userService.getUserByEmail(email);
+    const user = await userService.getUserByEmail(email, LOCAL_PROVIDER);
 
     if (user.value instanceof Error) throw user.value;
 
@@ -46,7 +50,7 @@ module.exports.login = async (req, res, next) => {
         },
         auth: {
           token,
-          expire_in: 3 * 60 * 60 * 1000, // 3h
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
         },
       },
     });
@@ -59,7 +63,7 @@ module.exports.register = async (req, res, next) => {
   try {
     const { email, password, username } = req.body;
 
-    const user = await userService.getUserByEmail(email);
+    const user = await userService.getUserByEmail(email, LOCAL_PROVIDER);
 
     if (user.value instanceof Error) throw user.value;
 
@@ -77,6 +81,7 @@ module.exports.register = async (req, res, next) => {
       is_verified: false,
       verified_code: verifiedCode,
       role: USER_ROLE,
+      provider: LOCAL_PROVIDER,
     });
 
     if (newUser.value instanceof Error) throw newUser.value;
@@ -99,7 +104,7 @@ module.exports.register = async (req, res, next) => {
         },
         auth: {
           token,
-          expire_in: 3 * 60 * 60 * 1000, // 3h
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
         },
       },
     });
@@ -163,7 +168,7 @@ module.exports.sendMailToChangePassword = async (req, res, next) => {
   try {
     const { email, host_fe, path_name } = req.body; // eslint-disable-line
 
-    const user = await userService.getUserByEmail(email);
+    const user = await userService.getUserByEmail(email, LOCAL_PROVIDER);
 
     if (user.value instanceof Error) throw user.value;
 
@@ -186,6 +191,70 @@ module.exports.sendMailToChangePassword = async (req, res, next) => {
     return res.status(200).json({
       data: {
         message: 'Send message successfully',
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.googleLogin = async (req, res, next) => {
+  try {
+    const { user } = req;
+
+    const existUser = await userService.getUserByEmail(
+      user.emails[0].value,
+      GOOGLE_PROVIDER
+    );
+
+    if (existUser.value instanceof Error) throw existUser.value;
+
+    if (!existUser.value) {
+      const newUser = await userService.insertUser({
+        _id: generateSafeId(),
+        username: user.displayName,
+        email: user.emails[0].value,
+        avatar: user._json.picture, // eslint-disable-line
+        provider: GOOGLE_PROVIDER,
+        role: USER_ROLE,
+      });
+
+      if (newUser.value instanceof Error) throw newUser.value;
+
+      const token = await jwtHelper.sign({
+        _id: newUser.value._id, // eslint-disable-line
+        email: newUser.value.email,
+        _role: newUser.value.role,
+      });
+
+      return res.status(201).json({
+        data: {
+          user: {
+            ...newUser.value,
+          },
+          auth: {
+            token,
+            expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+          },
+        },
+      });
+    }
+
+    const token = await jwtHelper.sign({
+      _id: existUser.value._id, // eslint-disable-line
+      email: existUser.value.email,
+      _role: existUser.value.role,
+    });
+
+    return res.status(200).json({
+      data: {
+        user: {
+          ...existUser.value,
+        },
+        auth: {
+          token,
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+        },
       },
     });
   } catch (error) {
