@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const config = require('config');
 const expressConfig = require('./core/express.core');
 const mongoConfig = require('./core/mongo.core');
