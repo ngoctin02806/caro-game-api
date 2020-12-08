@@ -1,19 +1,36 @@
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
+
 const express = require('express');
 const morgan = require('morgan');
 const config = require('config');
 const bodyParser = require('body-parser');
+const passport = require('passport');
 
-const router = require('../app/router');
+const passportConfig = require('./passport.core'); // eslint-disable-line
+
+const router = require('../routers/index');
 const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 const app = express();
+
+const server = https.createServer(
+  {
+    key: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.key')),
+    cert: fs.readFileSync(path.resolve(__dirname, '../app/keys/server.cert')),
+  },
+  app
+);
 
 module.exports = () =>
   new Promise((resolve, reject) => {
     try {
       app.use(morgan('dev'));
+
+      app.use(passport.initialize());
 
       // parse application/x-www-form-urlencoded
       app.use(bodyParser.urlencoded({ extended: false }));
@@ -21,7 +38,7 @@ module.exports = () =>
       // parse application/json
       app.use(bodyParser.json());
 
-      app.use(router);
+      app.use('/api/v1', router);
 
       /* Catch 404 Not Found */
       app.use((req, res, next) => {
@@ -34,10 +51,14 @@ module.exports = () =>
       app.use((error, req, res, next) => {
         return res
           .status(error.status || 500)
-          .json(httpErrorsHelper.notFound());
+          .json(
+            error.status
+              ? httpErrorsHelper.notFound()
+              : httpErrorsHelper.internalError(error.message)
+          );
       });
 
-      app.listen(
+      server.listen(
         process.env.NODE_ENV === 'development' ? config.get('PORT') : 3000,
         () => {
           /* eslint-disable-next-line */

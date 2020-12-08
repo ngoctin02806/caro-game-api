@@ -5,8 +5,8 @@ module.exports.sign = payload =>
   new Promise((resolve, reject) => {
     jwt.sign(
       { ...payload },
-      process.env.PRIVATE_KEY,
-      { algorithm: 'HS256', expiresIn: '1h' },
+      process.env.JWT_PRIVATE_KEY,
+      { algorithm: 'RS256', expiresIn: '3h' },
       (error, token) => {
         if (error) return reject(error);
         return resolve(token);
@@ -18,8 +18,8 @@ module.exports.verifyToken = token =>
   new Promise((resolve, reject) => {
     jwt.verify(
       token,
-      process.env.PUBLIC_KEY,
-      { algorithms: 'HS256' },
+      process.env.JWT_PUBLIC_KEY,
+      { algorithms: ['RS256'] },
       (error, decoded) => {
         if (error) return reject(error);
         return resolve(decoded);

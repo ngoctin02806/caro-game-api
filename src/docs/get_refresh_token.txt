@@ -1,0 +1,11 @@
+https://accounts.google.com/o/oauth2/v2/auth?
+ scope=https://mail.google.com&
+ access_type=offline&
+ include_granted_scopes=true&
+ response_type=code&
+ state=state_parameter_passthrough_value&
+ redirect_uri=http://localhost:8000&
+ client_id=275202630194-579h9co7coe7jc0rpjd6rvie7rcndgfb.apps.googleusercontent.com
+
+ -----------------
+ http://localhost:8000/?state=state_parameter_passthrough_value&code=4/0AY0e-g6cOhZ3M40wlDqmS_hFHM5YK4E460rapjuGVvUo9rWUFl2dEFwPVxFLDx7HiQR-wQ&scope=https://mail.google.com/
