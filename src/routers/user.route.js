@@ -51,4 +51,8 @@ router.post(
   userController.facebookLogin
 );
 
+router.get('/me/user-online', authMiddleware, userController.getOnlineFriends);
+
+router.get('/me/profile', authMiddleware, userController.getProfile);
+
 module.exports = router;

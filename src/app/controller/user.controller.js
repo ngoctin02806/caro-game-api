@@ -336,3 +336,48 @@ module.exports.facebookLogin = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.getOnlineFriends = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const users = await userService.getUserOnline(_id);
+
+    if (users.value instanceof Error) throw users.value;
+
+    return res.status(200).json({
+      data: {
+        users: users.value,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getProfile = async (req, res, next) => {
+  try {
+    const { _id } = req.user;
+
+    const user = await userService.getUserById(_id);
+
+    if (user.value instanceof Error) throw user.value;
+
+    if (!user.value)
+      return res.status(400).json(httpErrorsHelper.userNotExist());
+
+    delete user.value.password;
+    delete user.value.is_verified;
+    delete user.value.verified_code;
+
+    return res.status(200).json({
+      data: {
+        user: {
+          ...user.value,
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};

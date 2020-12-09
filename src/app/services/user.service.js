@@ -77,10 +77,26 @@ const updateOne = async (condition, payload) => {
   }
 };
 
+const getUserOnline = async userId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const users = await collection
+      .find({ $and: [{ _id: { $ne: userId } }, { role: 'USER' }] })
+      .toArray();
+
+    return Promise.resolve(Result.Ok(users));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
   insertUser,
   updateVerifiedCode,
   updateOne,
+  getUserOnline,
 };
