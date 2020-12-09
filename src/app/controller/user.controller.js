@@ -39,6 +39,7 @@ module.exports.login = async (req, res, next) => {
       _id: user.value._id, // eslint-disable-line
       email: user.value.email,
       _role: user.value.role,
+      _verified: user.value.is_verified,
     });
 
     delete user.value.password;
@@ -93,6 +94,7 @@ module.exports.register = async (req, res, next) => {
       _id: newUser.value._id, // eslint-disable-line
       email: newUser.value.email,
       _role: newUser.value.role,
+      _verified: newUser.value.is_verified,
     });
 
     return res.status(201).json({
@@ -228,6 +230,7 @@ module.exports.googleLogin = async (req, res, next) => {
         _id: newUser.value._id, // eslint-disable-line
         email: newUser.value.email,
         _role: newUser.value.role,
+        _verified: true,
       });
 
       return res.status(201).json({
@@ -247,6 +250,7 @@ module.exports.googleLogin = async (req, res, next) => {
       _id: existUser.value._id, // eslint-disable-line
       email: existUser.value.email,
       _role: existUser.value.role,
+      _verified: true,
     });
 
     return res.status(200).json({
@@ -294,6 +298,7 @@ module.exports.facebookLogin = async (req, res, next) => {
         _id: newUser.value._id, // eslint-disable-line
         email: newUser.value.email,
         _role: newUser.value.role,
+        _verified: true,
       });
 
       return res.status(201).json({
@@ -313,6 +318,7 @@ module.exports.facebookLogin = async (req, res, next) => {
       _id: existUser.value._id, // eslint-disable-line
       email: existUser.value.email,
       _role: existUser.value.role,
+      _verified: true,
     });
 
     return res.status(200).json({
