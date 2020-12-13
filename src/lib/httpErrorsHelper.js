@@ -38,4 +38,8 @@ module.exports = {
     new createError(400, 'code does not match', {
       errors: [{ code: 7007, message: 'code does not match' }],
     }),
+  gameNotExist: () =>
+    new createError(400, 'game is not exist', {
+      errors: [{ code: 7008, message: 'Game is not exist' }],
+    }),
 };
