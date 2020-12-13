@@ -1,4 +1,5 @@
 const generateSafeId = require('generate-safe-id');
+const config = require('config');
 const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const {
@@ -15,7 +16,10 @@ module.exports.createAConversation = async (req, res, next) => {
     const { _id } = req.user;
 
     const conversation = await conversationService.findOneConversation({
-      $and: [{ type: CONVERSATION_SINGLE }, { participants }],
+      $and: [
+        { type: CONVERSATION_SINGLE },
+        { participants: { $all: participants } },
+      ],
     });
 
     if (conversation.value instanceof Error) throw conversation.value;
@@ -96,6 +100,31 @@ module.exports.getConversationById = async (req, res, next) => {
   try {
     const { conversationId } = req.params;
 
+    const conversation = await conversationService.findAConversationData(
+      conversationId
+    );
+
+    if (conversation.value instanceof Error) throw conversation.value;
+
+    if (!conversation.value)
+      return res.status(400).json(httpErrorsHelper.notFound());
+
+    return res.status(200).json({
+      data: {
+        ...conversation.value,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getAllMessagesByConversationId = async (req, res, next) => {
+  try {
+    const { conversationId } = req.params;
+
+    const { offset = 1, limit = config.get('LIMIT') } = req.query;
+
     const conversation = await conversationService.findOneConversation({
       _id: conversationId,
     });
@@ -103,19 +132,18 @@ module.exports.getConversationById = async (req, res, next) => {
     if (conversation.value instanceof Error) throw conversation.value;
 
     if (!conversation.value)
-      return res.status(400).json(httpErrorsHelper.notFound());
+      return res.status(400).json(httpErrorsHelper.conversationNotExist());
 
     const messages = await conversationService.findAllMessages({
-      conversation_id: conversationId,
+      conversationId,
+      offset,
+      limit,
     });
 
     if (messages.value instanceof Error) throw messages.value;
 
     return res.status(200).json({
-      data: {
-        ...conversation.value,
-        messsages: messages.value,
-      },
+      messages: messages.value,
     });
   } catch (error) {
     return next(error);

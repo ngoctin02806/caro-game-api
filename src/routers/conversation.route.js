@@ -28,4 +28,10 @@ router.get(
   conversationController.getConversationById
 );
 
+router.get(
+  '/conversations/:conversationId/messages',
+  authMiddleware,
+  conversationController.getAllMessagesByConversationId
+);
+
 module.exports = router;

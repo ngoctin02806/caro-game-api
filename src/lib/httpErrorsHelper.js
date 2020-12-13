@@ -42,4 +42,8 @@ module.exports = {
     new createError(400, 'game is not exist', {
       errors: [{ code: 7008, message: 'Game is not exist' }],
     }),
+  conversationNotExist: () =>
+    new createError(400, 'conversation is not exist', {
+      errors: [{ code: 7009, message: 'Conversation is not exist' }],
+    }),
 };
