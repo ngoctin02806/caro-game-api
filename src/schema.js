@@ -59,3 +59,22 @@ module.exports.changePasswordThroughEmail = {
   },
   required: ['email', 'host_fe', 'path_name'],
 };
+
+module.exports.createAConversation = {
+  type: 'object',
+  properties: {
+    participants: {
+      type: 'array',
+      items: {
+        type: 'string',
+        minLength: 40,
+        maxLength: 40,
+      },
+    },
+    type: {
+      type: 'string',
+      enum: ['CONVERSATION_SINGLE', 'CONVERSATION_GROUP', 'CONVERSATION_GAME'],
+    },
+  },
+  required: ['participants', 'type'],
+};
