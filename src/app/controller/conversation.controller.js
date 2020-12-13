@@ -123,6 +123,8 @@ module.exports.getAllMessagesByConversationId = async (req, res, next) => {
   try {
     const { conversationId } = req.params;
 
+    console.log(config.get('LIMIT'));
+
     const { offset = 1, limit = config.get('LIMIT') } = req.query;
 
     const conversation = await conversationService.findOneConversation({
