@@ -136,8 +136,8 @@ module.exports.getAllMessagesByConversationId = async (req, res, next) => {
 
     const messages = await conversationService.findAllMessages({
       conversationId,
-      offset,
-      limit,
+      offset: parseInt(offset), // eslint-disable-line
+      limit: parseInt(limit), // eslint-disable-line
     });
 
     if (messages.value instanceof Error) throw messages.value;

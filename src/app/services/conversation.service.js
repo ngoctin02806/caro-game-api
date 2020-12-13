@@ -4,7 +4,7 @@ const { get } = require('lodash');
 const mongo = require('../../core/mongo.core');
 
 const COLLECTION = 'conversations';
-const MSG_COLLECTION = 'messsages';
+const MSG_COLLECTION = 'messages';
 
 const insertOne = async data => {
   try {
