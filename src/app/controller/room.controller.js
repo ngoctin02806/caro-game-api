@@ -40,9 +40,7 @@ module.exports.joinRoom = async (req, res, next) => {
     currentRoom.players.map(player => {
       if (player.player_id === userId) {
         userInRoomFlag = true;
-        return res.status(400).json({
-          message: 'User is already in room',
-        });
+        return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
       }
       return null;
     });
@@ -50,9 +48,7 @@ module.exports.joinRoom = async (req, res, next) => {
     currentRoom.guests.map(guest => {
       if (guest.guest_id === userId) {
         userInRoomFlag = true;
-        return res.status(400).json({
-          message: 'User is already in room',
-        });
+        return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
       }
       return null;
     });
