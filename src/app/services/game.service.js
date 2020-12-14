@@ -31,7 +31,24 @@ const findOneGame = async payload => {
   }
 };
 
+const updateRoom = async (roomId, players, guests) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.updateOne(
+      { _id: roomId },
+      { $set: { players, guests } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   insertOne,
   findOneGame,
+  updateRoom,
 };

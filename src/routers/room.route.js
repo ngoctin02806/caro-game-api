@@ -7,4 +7,6 @@ const authMiddleware = require('../middlewares/auth.middleware');
 
 router.post('/room/create', authMiddleware, roomController.createRoom);
 
+router.post('/room/join/:roomId', authMiddleware, roomController.joinRoom);
+
 module.exports = router;
