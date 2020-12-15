@@ -9,4 +9,6 @@ router.post('/room/create', authMiddleware, roomController.createRoom);
 
 router.post('/room/join/:roomId', authMiddleware, roomController.joinRoom);
 
+router.get('/room/get-all', authMiddleware, roomController.getAllRooms);
+
 module.exports = router;

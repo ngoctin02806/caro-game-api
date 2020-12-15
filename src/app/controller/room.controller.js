@@ -104,3 +104,14 @@ module.exports.joinRoom = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.getAllRooms = async (req, res, next) => {
+  try {
+    const result = await roomService.getAllRooms();
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(201).json(result.value);
+  } catch (err) {
+    return next(err);
+  }
+};
