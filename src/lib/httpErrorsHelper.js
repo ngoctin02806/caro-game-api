@@ -46,4 +46,12 @@ module.exports = {
     new createError(400, 'conversation is not exist', {
       errors: [{ code: 7009, message: 'Conversation is not exist' }],
     }),
+  userIsAlreadyInRoom: () =>
+    new createError(400, 'user is already in room', {
+      errors: [{ code: 7010, message: 'User is already in room' }],
+    }),
+  userNotMatch: () =>
+    new createError(400, 'participant does not match', {
+      errors: [{ code: 7011, message: 'participant does not match' }],
+    }),
 };

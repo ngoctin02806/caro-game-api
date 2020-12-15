@@ -53,8 +53,6 @@ module.exports.createAConversation = async (req, res, next) => {
 module.exports.createAGameConversation = async (req, res, next) => {
   try {
     const { gameId } = req.params;
-    const { participants, type } = req.body;
-    const { _id } = req.user;
 
     const game = await gameService.findOneGame({ _id: gameId });
 
@@ -64,27 +62,13 @@ module.exports.createAGameConversation = async (req, res, next) => {
       return res.status(400).json(httpErrorsHelper.gameNotExist());
 
     const conversation = await conversationService.findOneConversation({
-      $and: [{ type: CONVERSATION_GAME }, { participants }],
+      $and: [{ room_id: game.value._id }, { type: CONVERSATION_GAME }], // eslint-disable-line
     });
 
     if (conversation.value instanceof Error) throw conversation.value;
 
-    if (!conversation.value) {
-      const result = await conversationService.insertOne({
-        _id: generateSafeId(),
-        participants,
-        type,
-        room_id: gameId,
-        created_by: _id,
-        created_at: new Date().getTime(),
-      });
-
-      if (result.value instanceof Error) throw result.value;
-
-      return res.status(201).json({
-        ...result.value,
-      });
-    }
+    if (!conversation.value)
+      return res.status(400).json(httpErrorsHelper.conversationNotExist());
 
     return res.status(200).json({
       data: {
