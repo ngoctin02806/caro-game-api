@@ -2,18 +2,37 @@ const generateSafeId = require('generate-safe-id');
 const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const roomService = require('../services/game.service');
+const conversationService = require('../services/conversation.service');
 
 module.exports.createRoom = async (req, res, next) => {
   try {
     const { _id } = req.user;
     const newRoom = {
       _id: generateSafeId(),
-      players: new Array({ player_id: _id }),
+      players: new Array(_id),
       guests: new Array(0),
+      created_by: _id,
+      created_at: new Date().getTime(),
     };
 
+    // create room
     const result = await roomService.insertOne(newRoom);
     if (result.value instanceof Error) throw result.value;
+
+    // create conversation
+    try {
+      const resultInsertConversion = await conversationService.insertOne({
+        _id: generateSafeId(),
+        participants: new Array(_id),
+        type: 'CONVERSATION_GAME',
+        created_by: _id,
+        created_at: new Date().getTime(),
+      });
+
+      if (resultInsertConversion.value instanceof Error) throw result.value;
+    } catch (err) {
+      return next(err);
+    }
 
     return res.status(201).json({
       ...result.value,
@@ -38,7 +57,7 @@ module.exports.joinRoom = async (req, res, next) => {
     let userInRoomFlag = false;
 
     currentRoom.players.map(player => {
-      if (player.player_id === userId) {
+      if (player === userId) {
         userInRoomFlag = true;
         return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
       }
@@ -46,7 +65,7 @@ module.exports.joinRoom = async (req, res, next) => {
     });
 
     currentRoom.guests.map(guest => {
-      if (guest.guest_id === userId) {
+      if (guest === userId) {
         userInRoomFlag = true;
         return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
       }
@@ -56,7 +75,7 @@ module.exports.joinRoom = async (req, res, next) => {
     if (userInRoomFlag) return; // eslint-disable-line
 
     if (currentRoom.players.length < 2) {
-      currentRoom.players.push({ player_id: userId });
+      currentRoom.players.push(userId);
       const result = await roomService.updateRoom(
         roomId,
         currentRoom.players,
@@ -69,7 +88,7 @@ module.exports.joinRoom = async (req, res, next) => {
       });
     }
 
-    currentRoom.guests.push({ guest_id: userId });
+    currentRoom.guests.push(userId);
     const result = await roomService.updateRoom(
       roomId,
       currentRoom.players,
