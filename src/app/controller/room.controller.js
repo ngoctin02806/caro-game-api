@@ -3,7 +3,6 @@ const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const roomService = require('../services/game.service');
 const conversationService = require('../services/conversation.service');
-const gameService = require('../services/game1.service');
 
 module.exports.createRoom = async (req, res, next) => {
   try {
@@ -19,28 +18,6 @@ module.exports.createRoom = async (req, res, next) => {
     // create room
     const result = await roomService.insertOne(newRoom);
     if (result.value instanceof Error) throw result.value;
-
-    // create game
-    try {
-      const findRoom = await roomService.findOneGame({ _id: newRoom._id }); // eslint-disable-line
-      if (findRoom.value instanceof Error) throw findRoom.value;
-      if (!findRoom.value)
-        return res.status(400).json(httpErrorsHelper.gameNotExist());
-
-      const newGame = {
-        _id: generateSafeId(),
-        created_by: _id,
-        winner: '',
-        room_id: newRoom._id, // eslint-disable-line
-        steps: new Array(0),
-        created_at: new Date().getTime(),
-      };
-
-      const resultInsertGame = await gameService.insertOne(newGame);
-      if (resultInsertGame.value instanceof Error) throw resultInsertGame.value;
-    } catch (err) {
-      return next(err);
-    }
 
     // create conversation
     try {
