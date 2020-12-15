@@ -24,6 +24,7 @@ module.exports.createRoom = async (req, res, next) => {
       const resultInsertConversion = await conversationService.insertOne({
         _id: generateSafeId(),
         participants: new Array(_id),
+        roomId: newRoom._id, // eslint-disable-line
         type: 'CONVERSATION_GAME',
         created_by: _id,
         created_at: new Date().getTime(),
