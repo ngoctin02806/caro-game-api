@@ -20,6 +20,7 @@ module.exports.createGame = async (req, res, next) => {
       winner: '',
       room_id: roomId,
       steps: new Array(0),
+      created_at: new Date().getTime(),
     };
 
     const result = await gameService.insertOne(newGame);
