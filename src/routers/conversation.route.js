@@ -4,7 +4,6 @@ const conversationController = require('../app/controller/conversation.controlle
 const authMiddleware = require('../middlewares/auth.middleware');
 const vaidator = require('../utils/validator');
 const schema = require('../schema');
-const validator = require('../utils/validator');
 
 const router = express.Router();
 
@@ -15,10 +14,9 @@ router.post(
   conversationController.createAConversation
 );
 
-router.post(
-  '/games/:gameId/conversations',
+router.get(
+  '/games/:gameId/conversation',
   authMiddleware,
-  validator(schema.createAConversation),
   conversationController.createAGameConversation
 );
 
