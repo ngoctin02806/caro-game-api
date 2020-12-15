@@ -3,7 +3,7 @@ const { get } = require('lodash');
 
 const mongo = require('../../core/mongo.core');
 
-const COLLECTION = 'rooms';
+const COLLECTION = 'games';
 
 const insertOne = async data => {
   try {
@@ -18,27 +18,14 @@ const insertOne = async data => {
   }
 };
 
-const findOneGame = async payload => {
-  try {
-    const db = mongo.db();
-    const collection = db.collection(COLLECTION);
-
-    const result = await collection.findOne({ ...payload });
-
-    return Promise.resolve(Result.Ok(result));
-  } catch (error) {
-    return Promise.resolve(Result.Error(error));
-  }
-};
-
-const updateRoom = async (roomId, players, guests) => {
+const updateGameWinner = async (gameId, winner) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
     const result = await collection.updateOne(
-      { _id: roomId },
-      { $set: { players, guests } }
+      { _id: gameId },
+      { $set: { winner } }
     );
 
     return Promise.resolve(Result.Ok(result));
@@ -47,8 +34,4 @@ const updateRoom = async (roomId, players, guests) => {
   }
 };
 
-module.exports = {
-  insertOne,
-  findOneGame,
-  updateRoom,
-};
+module.exports = { insertOne, updateGameWinner };
