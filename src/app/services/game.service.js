@@ -89,9 +89,42 @@ const getAllRooms = async ({ offset, limit }) => {
 const getRoom = async roomId => {
   try {
     const db = mongo.db();
-    const result = await db.collection(COLLECTION).findOne({ _id: roomId });
+    const result = await db
+      .collection(COLLECTION)
+      .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'players',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'guests',
+            foreignField: '_id',
+            as: 'guests',
+          },
+        },
+        {
+          $match: { _id: roomId },
+        },
+        {
+          $project: {
+            'players._id': 1,
+            'players.username': 1,
+            'players.avatar': 1,
+            'guests._id': 1,
+            'guests.username': 1,
+            'guests.avatar': 1,
+          },
+        },
+      ])
+      .toArray();
 
-    return Promise.resolve(Result.Ok(result));
+    return Promise.resolve(Result.Ok(result[0]));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
   }
