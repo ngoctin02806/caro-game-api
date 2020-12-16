@@ -3,6 +3,7 @@ const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const roomService = require('../services/game.service');
 const conversationService = require('../services/conversation.service');
+const userService = require('../services/user.service');
 
 module.exports.createRoom = async (req, res, next) => {
   try {
@@ -14,6 +15,11 @@ module.exports.createRoom = async (req, res, next) => {
       created_by: _id,
       created_at: new Date().getTime(),
     };
+
+    // Get user
+    const user = await userService.getUserById(_id);
+
+    if (user.value instanceof Error) throw user.value;
 
     // create room
     const result = await roomService.insertOne(newRoom);
@@ -37,6 +43,9 @@ module.exports.createRoom = async (req, res, next) => {
 
     return res.status(201).json({
       ...result.value,
+      players: [
+        { _id, username: user.value.username, avatar: user.value.avatar },
+      ],
     });
   } catch (err) {
     return next(err);
