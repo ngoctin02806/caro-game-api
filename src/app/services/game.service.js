@@ -52,13 +52,35 @@ const getAllRooms = async ({ offset, limit }) => {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
+    const count = await collection.count();
+
     const result = await collection
-      .find()
-      .skip(offset)
-      .limit(limit)
+      .aggregate([
+        {
+          $skip: (offset - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'players',
+          },
+        },
+        {
+          $project: {
+            'players._id': 1,
+            'players.username': 1,
+            'players.avatar': 1,
+          },
+        },
+      ])
       .toArray();
 
-    return Promise.resolve(Result.Ok(result));
+    return Promise.resolve(Result.Ok({ rooms: result, count }));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
   }

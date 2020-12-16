@@ -125,7 +125,12 @@ module.exports.getAllRooms = async (req, res, next) => {
 
     if (result.value instanceof Error) throw result.value;
 
-    return res.status(201).json(result.value);
+    return res.status(200).json({
+      total: result.value.count,
+      offset,
+      limit,
+      rooms: result.value.rooms,
+    });
   } catch (err) {
     return next(err);
   }
