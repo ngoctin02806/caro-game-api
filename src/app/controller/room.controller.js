@@ -1,4 +1,5 @@
 const generateSafeId = require('generate-safe-id');
+const config = require('config');
 const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const roomService = require('../services/game.service');
@@ -115,8 +116,13 @@ module.exports.joinRoom = async (req, res, next) => {
 };
 
 module.exports.getAllRooms = async (req, res, next) => {
+  const { offset = 1, limit = config.get('LIMIT') } = req.query;
   try {
-    const result = await roomService.getAllRooms();
+    const result = await roomService.getAllRooms({
+      offset: parseInt(offset), // eslint-disable-line
+      limit: parseInt(limit), // eslint-disable-line
+    });
+
     if (result.value instanceof Error) throw result.value;
 
     return res.status(201).json(result.value);
@@ -127,6 +133,7 @@ module.exports.getAllRooms = async (req, res, next) => {
 
 module.exports.getRoom = async (req, res, next) => {
   const { roomId } = req.params;
+
   try {
     const result = await roomService.getRoom(roomId);
     if (result.value instanceof Error) throw result.value;

@@ -47,12 +47,16 @@ const updateRoom = async (roomId, players, guests) => {
   }
 };
 
-const getAllRooms = async () => {
+const getAllRooms = async ({ offset, limit }) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
-    const result = await collection.find().toArray();
+    const result = await collection
+      .find()
+      .skip(offset)
+      .limit(limit)
+      .toArray();
 
     return Promise.resolve(Result.Ok(result));
   } catch (err) {
