@@ -115,3 +115,14 @@ module.exports.getAllRooms = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.getRoom = async (req, res, next) => {
+  const { roomId } = req.params;
+  try {
+    const result = await roomService.getRoom(roomId);
+    if (result.value instanceof Error) throw result.value;
+    return res.status(201).json(result.value);
+  } catch (err) {
+    return next(err);
+  }
+};
