@@ -47,8 +47,34 @@ const updateRoom = async (roomId, players, guests) => {
   }
 };
 
+const getAllRooms = async () => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.find().toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
+const getRoom = async roomId => {
+  try {
+    const db = mongo.db();
+    const result = await db.collection(COLLECTION).findOne({ _id: roomId });
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
 module.exports = {
   insertOne,
   findOneGame,
   updateRoom,
+  getAllRooms,
+  getRoom,
 };
