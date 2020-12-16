@@ -66,6 +66,11 @@ const findAllMessages = async ({ conversationId, offset, limit }) => {
     const results = await collection
       .aggregate([
         {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
           $match: {
             conversation_id: conversationId,
           },

@@ -1,8 +1,10 @@
 const generateSafeId = require('generate-safe-id');
+const config = require('config');
 const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 const roomService = require('../services/game.service');
 const conversationService = require('../services/conversation.service');
+const userService = require('../services/user.service');
 
 module.exports.createRoom = async (req, res, next) => {
   try {
@@ -14,6 +16,11 @@ module.exports.createRoom = async (req, res, next) => {
       created_by: _id,
       created_at: new Date().getTime(),
     };
+
+    // Get user
+    const user = await userService.getUserById(_id);
+
+    if (user.value instanceof Error) throw user.value;
 
     // create room
     const result = await roomService.insertOne(newRoom);
@@ -37,6 +44,9 @@ module.exports.createRoom = async (req, res, next) => {
 
     return res.status(201).json({
       ...result.value,
+      players: [
+        { _id, username: user.value.username, avatar: user.value.avatar },
+      ],
     });
   } catch (err) {
     return next(err);
@@ -100,6 +110,39 @@ module.exports.joinRoom = async (req, res, next) => {
     return res.status(201).json({
       ...result.value,
     });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+module.exports.getAllRooms = async (req, res, next) => {
+  const { offset = 1, limit = config.get('LIMIT') } = req.query;
+  try {
+    const result = await roomService.getAllRooms({
+      offset: parseInt(offset), // eslint-disable-line
+      limit: parseInt(limit), // eslint-disable-line
+    });
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({
+      total: result.value.count,
+      offset,
+      limit,
+      rooms: result.value.rooms,
+    });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+module.exports.getRoom = async (req, res, next) => {
+  const { roomId } = req.params;
+
+  try {
+    const result = await roomService.getRoom(roomId);
+    if (result.value instanceof Error) throw result.value;
+    return res.status(201).json(result.value);
   } catch (err) {
     return next(err);
   }
