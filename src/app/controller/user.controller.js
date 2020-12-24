@@ -381,3 +381,24 @@ module.exports.getProfile = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.giveaway = async (req, res, next) => {
+  try {
+    const { _id: userId } = req.user;
+
+    const user = await userService.getUserById(userId);
+
+    if (user.value instanceof Error) throw user.value;
+
+    if (user.value.has_topup)
+      return res.status(400).json(httpErrorsHelper.userHasTopUp());
+
+    const result = await userService.loginTopup(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ message: 'success' });
+  } catch (error) {
+    return next(error);
+  }
+};

@@ -1,3 +1,5 @@
+const { PRIVATE_ROOM, PUBLIC_ROOM } = require('./app/constants/room.constant');
+
 module.exports.login = {
   type: 'object',
   properties: {
@@ -77,4 +79,24 @@ module.exports.createAConversation = {
     },
   },
   required: ['participants', 'type'],
+};
+
+module.exports.createARoom = {
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+      enum: [PRIVATE_ROOM, PUBLIC_ROOM],
+    },
+    room_secret: {
+      type: 'string',
+      maxLength: 20,
+    },
+    bet_level: {
+      type: 'number',
+      minimum: 10,
+      maximum: 100,
+    },
+  },
+  required: ['type', 'bet_level', 'room_secret'],
 };

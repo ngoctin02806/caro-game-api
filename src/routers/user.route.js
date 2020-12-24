@@ -55,4 +55,6 @@ router.get('/me/user-online', authMiddleware, userController.getOnlineFriends);
 
 router.get('/me/profile', authMiddleware, userController.getProfile);
 
+router.post('/users/coins/giveaway', authMiddleware, userController.giveaway);
+
 module.exports = router;
