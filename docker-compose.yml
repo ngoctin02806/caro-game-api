@@ -39,7 +39,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
-    command: mongod --config /etc/mongo/mongod.conf
 networks:
   default:
     external:
