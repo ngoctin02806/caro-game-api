@@ -9,21 +9,27 @@ const userService = require('../services/user.service');
 module.exports.createRoom = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const newRoom = {
-      _id: generateSafeId(),
-      players: new Array(_id),
-      guests: new Array(0),
-      created_by: _id,
-      created_at: new Date().getTime(),
-    };
+    const { type, room_secret, bet_level } = req.body; // eslint-disable-line
 
     // Get user
     const user = await userService.getUserById(_id);
 
     if (user.value instanceof Error) throw user.value;
 
+    const newRoom = {
+      _id: generateSafeId(),
+      players: new Array(_id),
+      guests: new Array(0),
+      created_by: _id,
+      created_at: new Date().getTime(),
+      type,
+      room_secret,
+      bet_level,
+    };
+
     // create room
     const result = await roomService.insertOne(newRoom);
+
     if (result.value instanceof Error) throw result.value;
 
     // create conversation
@@ -142,7 +148,7 @@ module.exports.getRoom = async (req, res, next) => {
   try {
     const result = await roomService.getRoom(roomId);
     if (result.value instanceof Error) throw result.value;
-    return res.status(201).json(result.value);
+    return res.status(200).json(result.value);
   } catch (err) {
     return next(err);
   }

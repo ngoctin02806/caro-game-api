@@ -33,11 +33,13 @@ services:
       - "27017:27017"
     volumes: 
       -  "/opt/caro-mongo-data:/data/db"
+      -  "./mongoconfig:/etc/mongo"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
       - MONGO_USERNAME=${MONGO_USERNAME}
       - MONGO_PASSWORD=${MONGO_PASSWORD}
+    command: mongo --config /etc/mongo/mongod.conf
 networks:
   default:
     external:

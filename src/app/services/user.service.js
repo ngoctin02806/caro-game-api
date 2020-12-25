@@ -1,9 +1,15 @@
 const { get } = require('lodash'); // eslint-disable-line
 const Result = require('folktale/result');
 
+const generateSafeId = require('generate-safe-id');
+const { LOGIN_TOPUP } = require('../constants/coin.constant');
+const { settingKey } = require('../../settingData');
+
 const mongo = require('../../core/mongo.core');
 
 const COLLECTION = 'users';
+const POINT_COLLECTION = 'pointlogs';
+const SETTING_COLLECTION = 'settings';
 
 const getUserByEmail = async (email, provider) => {
   try {
@@ -92,6 +98,49 @@ const getUserOnline = async userId => {
   }
 };
 
+const loginTopup = async userId => {
+  try {
+    const db = mongo.db();
+    const runInTransaction = mongo.startTransaction();
+    const userCollection = db.collection(COLLECTION);
+    const pointLogCollection = db.collection(POINT_COLLECTION);
+    const settingCollection = db.collection(SETTING_COLLECTION);
+
+    const data = await runInTransaction(async session => {
+      const setting = await settingCollection.findOne({
+        key: settingKey.LOGIN_GIVEAWAY,
+      });
+
+      await userCollection.updateOne(
+        { _id: userId },
+        { $inc: { point: setting.value } },
+        { session }
+      );
+
+      await userCollection.updateOne(
+        { _id: userId },
+        { $set: { has_topup: true } },
+        { session }
+      );
+
+      await pointLogCollection.insertOne(
+        {
+          _id: generateSafeId(),
+          type: LOGIN_TOPUP,
+          value: setting.value,
+          user_id: userId,
+          created_at: new Date().getTime(),
+        },
+        { session }
+      );
+    });
+
+    return Promise.resolve(Result.Ok(data));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -99,4 +148,5 @@ module.exports = {
   updateVerifiedCode,
   updateOne,
   getUserOnline,
+  loginTopup,
 };

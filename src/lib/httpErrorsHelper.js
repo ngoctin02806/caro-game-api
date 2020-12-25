@@ -52,6 +52,10 @@ module.exports = {
     }),
   userNotMatch: () =>
     new createError(400, 'participant does not match', {
-      errors: [{ code: 7011, message: 'participant does not match' }],
+      errors: [{ code: 7011, message: 'Participant does not match' }],
+    }),
+  userHasTopUp: () =>
+    new createError(400, 'user has login topup', {
+      errors: [{ code: 7012, message: 'User has login topup' }],
     }),
 };
