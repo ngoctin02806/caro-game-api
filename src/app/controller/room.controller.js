@@ -5,6 +5,7 @@ const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 const roomService = require('../services/game.service');
 const conversationService = require('../services/conversation.service');
 const userService = require('../services/user.service');
+const { FULL_SLOT, HAS_JOINED } = require('../constants/room.constant');
 
 module.exports.createRoom = async (req, res, next) => {
   try {
@@ -63,61 +64,66 @@ module.exports.joinRoom = async (req, res, next) => {
   try {
     const userId = req.user._id; // eslint-disable-line
     const { roomId } = req.params;
-    const findRoom = await roomService.findOneGame({ _id: roomId });
+    // eslint-disable-next-line camelcase
+    const { room_secret } = req.body;
+    const room = await roomService.findOneGame({ _id: roomId });
 
-    if (findRoom.value instanceof Error) throw findRoom.value;
+    if (room.value instanceof Error) throw room.value;
 
-    if (!findRoom.value)
-      return res.status(400).json(httpErrorsHelper.gameNotExist());
+    if (!room.value)
+      return res.status(400).json(httpErrorsHelper.roomNotExist());
 
-    const currentRoom = findRoom.value;
-    let userInRoomFlag = false;
+    // eslint-disable-next-line camelcase
+    if (room.value.room_secret !== room_secret)
+      return res.status(400).json(httpErrorsHelper.roomSecretDoesNotMatch());
 
-    currentRoom.players.map(player => {
-      if (player === userId) {
-        userInRoomFlag = true;
-        return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
-      }
-      return null;
-    });
+    if (room.value.players.length === 2)
+      return res.status(200).json({ message: FULL_SLOT });
 
-    currentRoom.guests.map(guest => {
-      if (guest === userId) {
-        userInRoomFlag = true;
-        return res.status(400).json(httpErrorsHelper.userIsAlreadyInRoom());
-      }
-      return null;
-    });
+    const appendUser = await roomService.appendPlayerInRoom(roomId, userId);
 
-    if (userInRoomFlag) return; // eslint-disable-line
-
-    if (currentRoom.players.length < 2) {
-      currentRoom.players.push(userId);
-      const result = await roomService.updateRoom(
-        roomId,
-        currentRoom.players,
-        currentRoom.guests
-      );
-      if (result.value instanceof Error) throw result.value;
-
-      return res.status(201).json({
-        ...result.value,
-      });
-    }
-
-    currentRoom.guests.push(userId);
-    const result = await roomService.updateRoom(
+    const appendUserInConver = await conversationService.appendUserInConversation(
       roomId,
-      currentRoom.players,
-      currentRoom.guests
+      userId
     );
-    if (result.value instanceof Error) throw result.value;
 
-    return res.status(201).json({
-      ...result.value,
+    if (appendUserInConver.value instanceof Error)
+      throw appendUserInConver.value;
+
+    if (appendUser.value instanceof Error) throw appendUser.value;
+
+    return res.status(200).json({
+      message: HAS_JOINED,
     });
   } catch (err) {
     return next(err);
+  }
+};
+
+module.exports.leaveRoom = async (req, res, next) => {
+  try {
+    const { roomId } = req.params;
+    const { _id: userId } = req.user;
+
+    const room = await roomService.findOneGame({ _id: roomId });
+
+    if (room.value instanceof Error) throw room.value;
+
+    if (!room.value)
+      return res.status(400).json(httpErrorsHelper.roomNotExist());
+
+    const player = room.value.players.find(p => p === userId);
+
+    if (!player)
+      return res.status(400).json(httpErrorsHelper.userIsNotExistInRoom());
+
+    const result = await roomService.removePlayerInRoom(roomId, userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ message: 'success' });
+  } catch (error) {
+    return next(error);
   }
 };
 

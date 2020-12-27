@@ -14,9 +14,16 @@ router.post(
   roomController.createRoom
 );
 
-router.post('/room/join/:roomId', authMiddleware, roomController.joinRoom);
+router.post(
+  '/rooms/:roomId/join',
+  authMiddleware,
+  validator(schema.roomSecret),
+  roomController.joinRoom
+);
 
-router.get('/room/get-all', authMiddleware, roomController.getAllRooms);
+router.post('/rooms/:roomId/leave', authMiddleware, roomController.leaveRoom);
+
+router.get('/rooms', authMiddleware, roomController.getAllRooms);
 
 router.get('/rooms/:roomId', authMiddleware, roomController.getRoom);
 

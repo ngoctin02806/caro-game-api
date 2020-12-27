@@ -38,9 +38,9 @@ module.exports = {
     new createError(400, 'code does not match', {
       errors: [{ code: 7007, message: 'code does not match' }],
     }),
-  gameNotExist: () =>
-    new createError(400, 'game is not exist', {
-      errors: [{ code: 7008, message: 'Game is not exist' }],
+  roomNotExist: () =>
+    new createError(400, 'room is not exist', {
+      errors: [{ code: 7008, message: 'Room is not exist' }],
     }),
   conversationNotExist: () =>
     new createError(400, 'conversation is not exist', {
@@ -57,5 +57,13 @@ module.exports = {
   userHasTopUp: () =>
     new createError(400, 'user has login topup', {
       errors: [{ code: 7012, message: 'User has login topup' }],
+    }),
+  roomSecretDoesNotMatch: () =>
+    new createError(400, 'room secret does not match', {
+      errors: [{ code: 7013, message: 'Room secret does not match' }],
+    }),
+  userIsNotExistInRoom: () =>
+    new createError(400, 'user is not exist in room', {
+      errors: [{ code: 7014, message: 'user is not exist in room' }],
     }),
 };

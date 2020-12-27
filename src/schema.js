@@ -100,3 +100,13 @@ module.exports.createARoom = {
   },
   required: ['type', 'bet_level', 'room_secret'],
 };
+
+module.exports.roomSecret = {
+  type: 'object',
+  properties: {
+    room_secret: {
+      type: 'string',
+    },
+  },
+  required: ['room_secret'],
+};
