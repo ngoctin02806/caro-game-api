@@ -65,6 +65,7 @@
     "lodash": "^4.17.20",
     "mongodb": "^3.3.2",
     "morgan": "^1.9.1",
+    "node-cron": "^2.0.3",
     "nodemailer": "^6.4.16",
     "passport": "^0.4.1",
     "passport-facebook-token": "^4.0.0",
