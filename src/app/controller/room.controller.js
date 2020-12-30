@@ -128,9 +128,10 @@ module.exports.leaveRoom = async (req, res, next) => {
 };
 
 module.exports.getAllRooms = async (req, res, next) => {
+  const { _id: userId } = req.user;
   const { offset = 1, limit = config.get('LIMIT') } = req.query;
   try {
-    const result = await roomService.getAllRooms({
+    const result = await roomService.getAllRooms(userId, {
       offset: parseInt(offset), // eslint-disable-line
       limit: parseInt(limit), // eslint-disable-line
     });

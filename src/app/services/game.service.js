@@ -47,7 +47,7 @@ const updateRoom = async (roomId, players) => {
   }
 };
 
-const getAllRooms = async ({ offset, limit }) => {
+const getAllRooms = async (userId, { offset, limit }) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
@@ -80,51 +80,21 @@ const getAllRooms = async ({ offset, limit }) => {
             'players.role': 0,
             'players.provider': 0,
             'players.ref_id': 0,
-            room_secret: 0,
           },
         },
       ])
       .toArray();
 
-    return Promise.resolve(Result.Ok({ rooms: result, count }));
-  } catch (err) {
-    return Promise.resolve(Result.Error(err));
-  }
-};
+    const returnResult = result.map(r => {
+      if (r.created_by === userId) return r;
 
-const getRoom = async roomId => {
-  try {
-    const db = mongo.db();
-    const collection = db.collection(COLLECTION);
+      // eslint-disable-next-line no-param-reassign
+      delete r.room_secret;
 
-    const room = await collection
-      .aggregate([
-        {
-          $match: {
-            _id: roomId,
-          },
-        },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'players',
-            foreignField: '_id',
-            as: 'players',
-          },
-        },
-        {
-          $project: {
-            'players.password': 0,
-            'players.role': 0,
-            'players.is_verified': 0,
-            'players.verified_code': 0,
-            'players.provider': 0,
-          },
-        },
-      ])
-      .toArray();
+      return r;
+    });
 
-    return Promise.resolve(Result.Ok(room[0]));
+    return Promise.resolve(Result.Ok({ rooms: returnResult, count }));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
   }
@@ -167,7 +137,6 @@ module.exports = {
   findOneGame,
   updateRoom,
   getAllRooms,
-  getRoom,
   appendPlayerInRoom,
   removePlayerInRoom,
 };
