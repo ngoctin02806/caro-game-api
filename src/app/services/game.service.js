@@ -100,6 +100,44 @@ const getAllRooms = async (userId, { offset, limit }) => {
   }
 };
 
+const getRoom = async roomId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const room = await collection
+      .aggregate([
+        {
+          $match: {
+            _id: roomId,
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'players',
+          },
+        },
+        {
+          $project: {
+            'players.password': 0,
+            'players.role': 0,
+            'players.is_verified': 0,
+            'players.verified_code': 0,
+            'players.provider': 0,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(room[0]));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
 const appendPlayerInRoom = async (roomId, userId) => {
   try {
     const db = mongo.db();
@@ -136,6 +174,7 @@ module.exports = {
   insertOne,
   findOneGame,
   updateRoom,
+  getRoom,
   getAllRooms,
   appendPlayerInRoom,
   removePlayerInRoom,

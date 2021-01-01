@@ -5,7 +5,15 @@ const router = express.Router();
 const authMiddleware = require('../middlewares/auth.middleware');
 const gameController = require('../app/controller/game.controller');
 
-router.post('/game/create/:roomId', authMiddleware, gameController.createGame);
+const validator = require('../utils/validator');
+const schema = require('../schema');
+
+router.post(
+  '/rooms/:roomId/games',
+  authMiddleware,
+  validator(schema.createAGame),
+  gameController.createGame
+);
 
 router.post(
   '/game/update-winner/:gameId',

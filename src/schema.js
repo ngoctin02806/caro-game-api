@@ -110,3 +110,16 @@ module.exports.roomSecret = {
   },
   required: ['room_secret'],
 };
+
+module.exports.createAGame = {
+  type: 'object',
+  properties: {
+    players: {
+      type: 'array',
+      item: {
+        type: 'string',
+      },
+    },
+  },
+  required: ['players'],
+};

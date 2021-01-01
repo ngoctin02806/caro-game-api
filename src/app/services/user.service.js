@@ -141,6 +141,19 @@ const loginTopup = async userId => {
   }
 };
 
+const aggregate = async query => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.aggregate(query).toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -149,4 +162,5 @@ module.exports = {
   updateOne,
   getUserOnline,
   loginTopup,
+  aggregate,
 };
