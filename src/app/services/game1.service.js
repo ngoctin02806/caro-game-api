@@ -5,6 +5,19 @@ const mongo = require('../../core/mongo.core');
 
 const COLLECTION = 'games';
 
+const findOne = async gameId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const game = await collection.findOne({ _id: gameId });
+
+    return Promise.resolve(Result.Ok(game));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 const insertOne = async data => {
   try {
     const db = mongo.db();
@@ -34,4 +47,4 @@ const updateGameWinner = async (gameId, winner) => {
   }
 };
 
-module.exports = { insertOne, updateGameWinner };
+module.exports = { insertOne, updateGameWinner, findOne };

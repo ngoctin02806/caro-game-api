@@ -160,3 +160,15 @@ module.exports.getRoom = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.findEmptyRoom = async (req, res, next) => {
+  try {
+    const room = await roomService.findEmptyRoom();
+
+    if (room.value instanceof Error) throw room.value;
+
+    return res.status(200).json({ ...room.value });
+  } catch (error) {
+    return next(error);
+  }
+};

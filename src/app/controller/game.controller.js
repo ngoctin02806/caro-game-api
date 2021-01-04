@@ -68,3 +68,36 @@ module.exports.updateGameWinner = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.computePointForUser = async (req, res, next) => {
+  try {
+    const { roomId, gameId } = req.params;
+    const { _id: userId } = req.user;
+    const { point } = req.body;
+
+    const room = await roomService.findOneGame({ _id: roomId });
+
+    if (room.value instanceof Error) throw room.value;
+
+    if (!room.value)
+      return res.status(400).json(httpErrorsHelper.roomNotExist());
+
+    const game = await gameService.findOne(gameId);
+
+    if (game.value instanceof Error) throw game.value;
+
+    if (!game.value)
+      return res.status(400).json(httpErrorsHelper.gameNotExist());
+
+    if (game.value.room_id !== roomId)
+      return res.status(400).json(httpErrorsHelper.gameNotBelongToRoom());
+
+    const result = userSrv.computePointUser({ roomId, gameId, userId, point });
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ message: 'success' });
+  } catch (error) {
+    return next(error);
+  }
+};

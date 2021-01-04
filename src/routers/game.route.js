@@ -21,4 +21,11 @@ router.post(
   gameController.updateGameWinner
 );
 
+router.post(
+  '/rooms/:roomId/games/:gameId/coins/charge',
+  authMiddleware,
+  validator(schema.point),
+  gameController.computePointForUser
+);
+
 module.exports = router;

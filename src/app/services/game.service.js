@@ -2,6 +2,7 @@ const Result = require('folktale/result');
 const { get } = require('lodash');
 
 const mongo = require('../../core/mongo.core');
+const { PUBLIC_ROOM } = require('../constants/room.constant');
 
 const COLLECTION = 'rooms';
 
@@ -170,6 +171,39 @@ const removePlayerInRoom = async (roomId, userId) => {
   }
 };
 
+const findEmptyRoom = async () => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const room = await collection
+      .aggregate([
+        {
+          $match: {
+            type: PUBLIC_ROOM,
+          },
+        },
+        {
+          $project: {
+            room_size: {
+              $size: '$players',
+            },
+          },
+        },
+        {
+          $match: {
+            room_size: { $lt: 2 },
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(room[0]));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   insertOne,
   findOneGame,
@@ -178,4 +212,5 @@ module.exports = {
   getAllRooms,
   appendPlayerInRoom,
   removePlayerInRoom,
+  findEmptyRoom,
 };

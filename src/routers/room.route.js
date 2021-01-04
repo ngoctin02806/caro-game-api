@@ -27,4 +27,6 @@ router.get('/rooms', authMiddleware, roomController.getAllRooms);
 
 router.get('/rooms/:roomId', authMiddleware, roomController.getRoom);
 
+router.get('/room/emptiness', authMiddleware, roomController.findEmptyRoom);
+
 module.exports = router;

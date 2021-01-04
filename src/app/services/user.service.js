@@ -2,7 +2,7 @@ const { get } = require('lodash'); // eslint-disable-line
 const Result = require('folktale/result');
 
 const generateSafeId = require('generate-safe-id');
-const { LOGIN_TOPUP } = require('../constants/coin.constant');
+const { LOGIN_TOPUP, PLAY_GAME } = require('../constants/coin.constant');
 const { settingKey } = require('../../settingData');
 
 const mongo = require('../../core/mongo.core');
@@ -154,6 +154,40 @@ const aggregate = async query => {
   }
 };
 
+const computePointUser = async ({ roomId, gameId, userId, point }) => {
+  try {
+    const db = mongo.db();
+    const runInTransaction = mongo.startTransaction();
+    const collection = db.collection(COLLECTION);
+    const pointLogCollection = db.collection(POINT_COLLECTION);
+
+    const data = runInTransaction(async session => {
+      await pointLogCollection.insertOne(
+        {
+          _id: generateSafeId(),
+          type: PLAY_GAME,
+          value: point,
+          room_id: roomId,
+          game_id: gameId,
+          user_id: userId,
+          created_at: new Date().getTime(),
+        },
+        { session }
+      );
+
+      await collection.updateOne(
+        { _id: userId },
+        { $inc: { point } },
+        { session }
+      );
+    });
+
+    return Promise.resolve(Result.Ok(data));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -163,4 +197,5 @@ module.exports = {
   getUserOnline,
   loginTopup,
   aggregate,
+  computePointUser,
 };

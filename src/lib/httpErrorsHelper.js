@@ -64,6 +64,14 @@ module.exports = {
     }),
   userIsNotExistInRoom: () =>
     new createError(400, 'user is not exist in room', {
-      errors: [{ code: 7014, message: 'user is not exist in room' }],
+      errors: [{ code: 7014, message: 'User is not exist in room' }],
+    }),
+  gameNotExist: () =>
+    new createError(400, 'game is not exist', {
+      errors: [{ code: 7015, message: 'Game is not exist' }],
+    }),
+  gameNotBelongToRoom: () =>
+    new createError(400, 'game does not belong to room', {
+      errors: [{ code: 7016, message: 'Game does not belong to room' }],
     }),
 };

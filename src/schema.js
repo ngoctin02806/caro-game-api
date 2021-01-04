@@ -123,3 +123,13 @@ module.exports.createAGame = {
   },
   required: ['players'],
 };
+
+module.exports.point = {
+  type: 'object',
+  properties: {
+    point: {
+      type: 'number',
+    },
+  },
+  required: ['point'],
+};
