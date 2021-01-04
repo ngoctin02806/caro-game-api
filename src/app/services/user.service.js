@@ -10,6 +10,7 @@ const mongo = require('../../core/mongo.core');
 const COLLECTION = 'users';
 const POINT_COLLECTION = 'pointlogs';
 const SETTING_COLLECTION = 'settings';
+const GAME_COLLECTION = 'games';
 
 const getUserByEmail = async (email, provider) => {
   try {
@@ -154,12 +155,19 @@ const aggregate = async query => {
   }
 };
 
-const computePointUser = async ({ roomId, gameId, userId, point }) => {
+const computePointUser = async ({
+  roomId,
+  gameId,
+  userId,
+  point,
+  chessBoard,
+}) => {
   try {
     const db = mongo.db();
     const runInTransaction = mongo.startTransaction();
     const collection = db.collection(COLLECTION);
     const pointLogCollection = db.collection(POINT_COLLECTION);
+    const gameCollection = db.collection(GAME_COLLECTION);
 
     const data = runInTransaction(async session => {
       await pointLogCollection.insertOne(
@@ -179,6 +187,11 @@ const computePointUser = async ({ roomId, gameId, userId, point }) => {
         { _id: userId },
         { $inc: { point } },
         { session }
+      );
+
+      await gameCollection.updateOne(
+        { _id: gameId },
+        { $set: { steps: chessBoard } }
       );
     });
 

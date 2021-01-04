@@ -130,6 +130,13 @@ module.exports.point = {
     point: {
       type: 'number',
     },
+    chess_board: {
+      type: 'array',
+      item: {
+        type: 'array',
+        item: 'string',
+      },
+    },
   },
-  required: ['point'],
+  required: ['point', 'chess_board'],
 };

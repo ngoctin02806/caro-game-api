@@ -73,7 +73,7 @@ module.exports.computePointForUser = async (req, res, next) => {
   try {
     const { roomId, gameId } = req.params;
     const { _id: userId } = req.user;
-    const { point } = req.body;
+    const { point, chess_board: chessBoard } = req.body;
 
     const room = await roomService.findOneGame({ _id: roomId });
 
@@ -92,7 +92,13 @@ module.exports.computePointForUser = async (req, res, next) => {
     if (game.value.room_id !== roomId)
       return res.status(400).json(httpErrorsHelper.gameNotBelongToRoom());
 
-    const result = userSrv.computePointUser({ roomId, gameId, userId, point });
+    const result = userSrv.computePointUser({
+      roomId,
+      gameId,
+      userId,
+      point,
+      chessBoard,
+    });
 
     if (result.value instanceof Error) throw result.value;
 
