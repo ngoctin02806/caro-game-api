@@ -1,5 +1,6 @@
 const shortid = require('shortid');
 const generateSafeId = require('generate-safe-id');
+const config = require('config');
 
 const { onSendEmailEvent } = require('../../event/onSendEmail.event'); // eslint-disable-line
 const {
@@ -377,6 +378,74 @@ module.exports.getProfile = async (req, res, next) => {
         },
       },
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getAllUsers = async (req, res, next) => {
+  const { offset = 1, limit = config.get('LIMIT') } = req.query;
+
+  try {
+    const allUsers = await userService.getAllUsers({
+      offset: parseInt(offset), // eslint-disable-line
+      limit: parseInt(limit), // eslint-disable-line
+    });
+
+    if (allUsers.value instanceof Error) throw allUsers.value;
+
+    return res.status(200).json({ data: allUsers.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getUserProfile = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await userService.getUserById(userId);
+
+    if (user.value instanceof Error) throw user.value;
+
+    return res.status(200).json({ data: user.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.blockUser = async (req, res, next) => {
+  const { userId } = req.params;
+  // eslint-disable-next-line
+  if (req.user._id === userId) {
+    return res.status(400).json(httpErrorsHelper.unableToBlockYourSelf());
+  }
+
+  try {
+    const user = await userService.getUserById(userId);
+    if (user.value instanceof Error) throw user.value;
+    if (user.value.role === 'ADMIN')
+      return res.status(400).json(httpErrorsHelper.unableToBlockAnotherAdmin());
+
+    const result = await userService.blockUser(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ data: result.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.unBlockUser = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const result = await userService.unBlockUser(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ data: result.value });
   } catch (error) {
     return next(error);
   }

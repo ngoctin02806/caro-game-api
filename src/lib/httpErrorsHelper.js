@@ -14,6 +14,10 @@ module.exports = {
     new createError(401, 'unauthorized', {
       errors: [{ code: 7002, message: 'Unauthorized' }],
     }),
+  adminUnauthorized: () =>
+    new createError(401, 'admin unauthorized', {
+      errors: [{ code: 7002, message: 'Admin Unauthorized' }],
+    }),
   userNotExist: () =>
     new createError(400, 'user is not exist', {
       errors: [{ code: 7003, message: 'User is not exist' }],
@@ -53,5 +57,13 @@ module.exports = {
   userNotMatch: () =>
     new createError(400, 'participant does not match', {
       errors: [{ code: 7011, message: 'participant does not match' }],
+    }),
+  unableToBlockYourSelf: () =>
+    new createError(400, "you can't block yourself", {
+      errors: [{ code: 400, message: "You can't block yourself" }],
+    }),
+  unableToBlockAnotherAdmin: () =>
+    new createError(400, "you can't block another admin", {
+      errors: [{ code: 400, message: "You can't block another admin" }],
     }),
 };

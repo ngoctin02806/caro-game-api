@@ -92,6 +92,51 @@ const getUserOnline = async userId => {
   }
 };
 
+const getAllUsers = async ({ limit, offset }) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const users = await collection
+      .aggregate([{ $limit: limit }, { $skip: (offset - 1) * limit }])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(users));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const blockUser = async userId => {
+  try {
+    const collection = mongo.db().collection(COLLECTION);
+
+    const result = await collection.updateOne(
+      { _id: userId },
+      { $set: { is_blocked: true } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const unBlockUser = async userId => {
+  try {
+    const collection = mongo.db().collection(COLLECTION);
+
+    const result = await collection.updateOne(
+      { _id: userId },
+      { $set: { is_blocked: false } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -99,4 +144,7 @@ module.exports = {
   updateVerifiedCode,
   updateOne,
   getUserOnline,
+  getAllUsers,
+  blockUser,
+  unBlockUser,
 };

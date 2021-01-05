@@ -6,6 +6,7 @@ const userController = require('../app/controller/user.controller');
 
 const validator = require('../utils/validator');
 const authMiddleware = require('../middlewares/auth.middleware');
+const adminAuthMiddleware = require('../middlewares/adminAuth.middleware');
 const validateEmailMiddleware = require('../middlewares/validateEmail.middleware'); // eslint-disable-line
 const schema = require('../schema');
 
@@ -54,5 +55,25 @@ router.post(
 router.get('/me/user-online', authMiddleware, userController.getOnlineFriends);
 
 router.get('/me/profile', authMiddleware, userController.getProfile);
+
+router.get('/user/get-all', adminAuthMiddleware, userController.getAllUsers);
+
+router.get(
+  '/user/profile/:userId',
+  authMiddleware,
+  userController.getUserProfile
+);
+
+router.post(
+  '/user/block/:userId',
+  adminAuthMiddleware,
+  userController.blockUser
+);
+
+router.post(
+  '/user/unblock/:userId',
+  adminAuthMiddleware,
+  userController.unBlockUser
+);
 
 module.exports = router;
