@@ -145,7 +145,7 @@ const appendUserInConversation = async (roomId, userId) => {
 
     const result = await collection.update(
       { room_id: roomId },
-      { $push: { participants: userId } }
+      { $addToSet: { participants: userId } }
     );
 
     return Promise.resolve(Result.Ok(result));

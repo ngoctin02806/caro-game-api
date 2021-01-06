@@ -1,4 +1,5 @@
 const { PRIVATE_ROOM, PUBLIC_ROOM } = require('./app/constants/room.constant');
+const { MOMO, VNPAY } = require('./app/constants/payment.constant');
 
 module.exports.login = {
   type: 'object',
@@ -137,6 +138,34 @@ module.exports.point = {
         item: 'string',
       },
     },
+    user_id: {
+      type: 'string',
+    },
   },
   required: ['point', 'chess_board'],
+};
+
+module.exports.transaction = {
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+      enum: [MOMO, VNPAY],
+    },
+    amount: {
+      type: 'number',
+    },
+    option: {
+      type: 'object',
+      properties: {
+        description: {
+          type: 'string',
+        },
+        user_id: {
+          type: 'string',
+        },
+      },
+    },
+  },
+  required: ['amount', 'option', 'type'],
 };

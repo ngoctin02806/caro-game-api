@@ -159,6 +159,7 @@ const computePointUser = async ({
   roomId,
   gameId,
   userId,
+  winnerId,
   point,
   chessBoard,
 }) => {
@@ -191,11 +192,36 @@ const computePointUser = async ({
 
       await gameCollection.updateOne(
         { _id: gameId },
-        { $set: { steps: chessBoard } }
+        { $set: { steps: chessBoard, winner_id: winnerId } }
       );
     });
 
     return Promise.resolve(Result.Ok(data));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const computePoinLogsUser = async userId => {
+  try {
+    const db = mongo.db();
+    const pointLogCollection = db.collection(POINT_COLLECTION);
+
+    const result = await pointLogCollection
+      .aggregate([
+        {
+          $match: { user_id: userId },
+        },
+        {
+          $group: {
+            _id: '$user_id',
+            coin: { $sum: '$value' },
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result[0].coin));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
@@ -211,4 +237,5 @@ module.exports = {
   loginTopup,
   aggregate,
   computePointUser,
+  computePoinLogsUser,
 };

@@ -74,4 +74,8 @@ module.exports = {
     new createError(400, 'game does not belong to room', {
       errors: [{ code: 7016, message: 'Game does not belong to room' }],
     }),
+  notEnoughPoint: () =>
+    new createError(400, 'user does not enough point', {
+      errors: [{ code: 7017, message: 'User does not enough point' }],
+    }),
 };

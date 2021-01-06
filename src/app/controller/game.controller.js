@@ -73,7 +73,7 @@ module.exports.computePointForUser = async (req, res, next) => {
   try {
     const { roomId, gameId } = req.params;
     const { _id: userId } = req.user;
-    const { point, chess_board: chessBoard } = req.body;
+    const { point, chess_board: chessBoard, user_id: winnerId } = req.body;
 
     const room = await roomService.findOneGame({ _id: roomId });
 
@@ -96,6 +96,7 @@ module.exports.computePointForUser = async (req, res, next) => {
       roomId,
       gameId,
       userId,
+      winnerId,
       point,
       chessBoard,
     });

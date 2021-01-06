@@ -17,6 +17,14 @@ module.exports.createRoom = async (req, res, next) => {
 
     if (user.value instanceof Error) throw user.value;
 
+    const pointLogs = await userService.computePoinLogsUser(_id);
+
+    if (pointLogs.value instanceof Error) throw pointLogs.value;
+
+    // eslint-disable-next-line camelcase
+    if (pointLogs.value < bet_level)
+      return res.status(400).json(httpErrorsHelper.notEnoughPoint());
+
     const newRoom = {
       _id: generateSafeId(),
       players: new Array(_id),
@@ -64,6 +72,7 @@ module.exports.joinRoom = async (req, res, next) => {
   try {
     const userId = req.user._id; // eslint-disable-line
     const { roomId } = req.params;
+
     // eslint-disable-next-line camelcase
     const { room_secret } = req.body;
     const room = await roomService.findOneGame({ _id: roomId });
@@ -73,6 +82,13 @@ module.exports.joinRoom = async (req, res, next) => {
     if (!room.value)
       return res.status(400).json(httpErrorsHelper.roomNotExist());
 
+    const pointLogs = await userService.computePoinLogsUser(userId);
+
+    if (pointLogs.value instanceof Error) throw pointLogs.value;
+
+    if (pointLogs.value < room.value.bet_level)
+      return res.status(400).json(httpErrorsHelper.notEnoughPoint());
+
     // eslint-disable-next-line camelcase
     if (room.value.room_secret !== room_secret)
       return res.status(400).json(httpErrorsHelper.roomSecretDoesNotMatch());
@@ -80,7 +96,11 @@ module.exports.joinRoom = async (req, res, next) => {
     if (room.value.players.length === 2)
       return res.status(200).json({ message: FULL_SLOT });
 
-    const appendUser = await roomService.appendPlayerInRoom(roomId, userId);
+    const appendUser = await roomService.appendPlayerInRoom(
+      roomId,
+      userId,
+      room.value.players
+    );
 
     const appendUserInConver = await conversationService.appendUserInConversation(
       roomId,

@@ -16,9 +16,9 @@ const startServer = async () => {
 
     await mongoConfig.connect(config.get('MONGO_URL'));
 
-    await scheduleGiveaway('0 0 0 * * *', giveawayJob); // Reset has_topup properties of users
-
     await settingConfig();
+
+    await scheduleGiveaway('0 0 0 * * *', giveawayJob); // Reset has_topup properties of users
   } catch (error) {
     logger.error(error);
   }

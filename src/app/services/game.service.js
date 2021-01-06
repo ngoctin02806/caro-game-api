@@ -139,15 +139,19 @@ const getRoom = async roomId => {
   }
 };
 
-const appendPlayerInRoom = async (roomId, userId) => {
+const appendPlayerInRoom = async (roomId, userId, players) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
     const result = await collection.update(
       { _id: roomId },
-      { $push: { players: userId }, $set: { status: true } }
+      { $addToSet: { players: userId } }
     );
+
+    if (players.length === 1) {
+      await collection.update({ _id: roomId }, { $set: { status: true } });
+    }
 
     return Promise.resolve(Result.Ok(result));
   } catch (error) {

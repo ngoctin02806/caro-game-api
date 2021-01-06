@@ -20,4 +20,6 @@ module.exports.settingConfig = async () => {
       });
     }
   }
+
+  return Promise.resolve();
 };
