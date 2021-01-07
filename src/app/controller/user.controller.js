@@ -450,3 +450,17 @@ module.exports.unBlockUser = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.searchByUsernameAndEmail = async (req, res, next) => {
+  const { username, email } = req.body;
+
+  try {
+    const users = await userService.queryByUsernameAndEmail(username, email);
+
+    if (users.value instanceof Error) throw users.value;
+
+    return res.status(200).json({ data: users.value });
+  } catch (error) {
+    return next(error);
+  }
+};

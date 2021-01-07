@@ -137,6 +137,23 @@ const unBlockUser = async userId => {
   }
 };
 
+const queryByUsernameAndEmail = async (username = '', email = '') => {
+  try {
+    const collection = mongo.db().collection(COLLECTION);
+
+    const users = await collection
+      .find({
+        username: { $regex: username, $options: 'i' },
+        email: { $regex: email, $options: 'i' },
+      })
+      .toArray();
+
+    return Promise.resolve(Result.Ok(users));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -147,4 +164,5 @@ module.exports = {
   getAllUsers,
   blockUser,
   unBlockUser,
+  queryByUsernameAndEmail,
 };

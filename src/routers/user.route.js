@@ -76,4 +76,10 @@ router.post(
   userController.unBlockUser
 );
 
+router.post(
+  '/user/search-by-username-and-email',
+  authMiddleware,
+  userController.searchByUsernameAndEmail
+);
+
 module.exports = router;
