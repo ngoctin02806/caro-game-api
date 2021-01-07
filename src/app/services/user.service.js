@@ -286,8 +286,10 @@ const findUserProfile = async userId => {
       Result.Ok({
         user: profile,
         point: point[0].count,
-        number_of_wins: game[0].numberOfWins,
-        number_of_loses: game[0].numberOfMatches - game[0].numberOfWins,
+        number_of_wins: game[0] ? game[0].numberOfWins : 0,
+        number_of_loses: game[0]
+          ? game[0].numberOfMatches - game[0].numberOfWins
+          : 0,
       })
     );
   } catch (error) {

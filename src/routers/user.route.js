@@ -31,7 +31,7 @@ router.post(
 );
 
 router.post(
-  '/me/account/password/reset',
+  '/user/account/password/forget',
   validator(schema.changePasswordThroughEmail),
   userController.sendMailToChangePassword
 );
@@ -61,6 +61,13 @@ router.get(
   '/users/:userId/profile',
   authMiddleware,
   userController.getUserProfile
+);
+
+router.post(
+  '/user/account/password/reset',
+  authMiddleware,
+  validator(schema.renewPassword),
+  userController.changePassword
 );
 
 module.exports = router;

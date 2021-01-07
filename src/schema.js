@@ -169,3 +169,14 @@ module.exports.transaction = {
   },
   required: ['amount', 'option', 'type'],
 };
+
+module.exports.renewPassword = {
+  type: 'object',
+  properties: {
+    new_password: {
+      type: 'string',
+      minLength: 8,
+    },
+  },
+  required: ['new_password'],
+};

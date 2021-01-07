@@ -132,9 +132,20 @@ module.exports.activateAccount = async (req, res, next) => {
 
     if (result.value instanceof Error) throw result.value;
 
+    const newToken = await jwtHelper.sign({
+      _id: user.value._id, // eslint-disable-line
+      email: user.value.email,
+      _role: user.value.role,
+      _verified: true,
+    });
+
     return res.status(200).json({
       data: {
         message: 'Activate successfully',
+        auth: {
+          token: newToken,
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+        },
       },
     });
   } catch (error) {
@@ -412,6 +423,22 @@ module.exports.getUserProfile = async (req, res, next) => {
     if (result.value instanceof Error) throw result.value;
 
     return res.status(200).json({ ...result.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.changePassword = async (req, res, next) => {
+  try {
+    const { new_password: newPassword } = req.body;
+    const { _id: userId } = req.user;
+
+    const salt = await bcryptjsHelper.genSalt(10);
+    const hashPassword = await bcryptjsHelper.hashPassword(salt, newPassword);
+
+    await userService.updateOne({ _id: userId }, { password: hashPassword });
+
+    return res.status(200).json({ message: 'success' });
   } catch (error) {
     return next(error);
   }
