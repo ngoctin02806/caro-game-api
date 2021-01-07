@@ -57,4 +57,10 @@ router.get('/me/profile', authMiddleware, userController.getProfile);
 
 router.post('/users/coins/giveaway', authMiddleware, userController.giveaway);
 
+router.get(
+  '/users/:userId/profile',
+  authMiddleware,
+  userController.getUserProfile
+);
+
 module.exports = router;

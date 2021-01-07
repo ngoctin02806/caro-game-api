@@ -227,6 +227,72 @@ const computePoinLogsUser = async userId => {
   }
 };
 
+const findUserProfile = async userId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+    const pointLogCollection = db.collection(POINT_COLLECTION);
+    const gameCollection = db.collection(GAME_COLLECTION);
+
+    const [profile, point, game] = await Promise.all([
+      collection.findOne({ _id: userId }),
+      pointLogCollection
+        .aggregate([
+          {
+            $group: {
+              _id: '$user_id',
+              count: { $sum: '$value' },
+            },
+          },
+          {
+            $match: {
+              _id: userId,
+            },
+          },
+        ])
+        .toArray(),
+      gameCollection
+        .aggregate([
+          {
+            $unwind: '$players',
+          },
+          {
+            $match: {
+              players: userId,
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              numberOfWins: {
+                $sum: { $cond: [{ $eq: ['$winner_id', userId] }, 1, 0] },
+              },
+              numberOfMatches: {
+                $sum: 1,
+              },
+            },
+          },
+        ])
+        .toArray(),
+    ]);
+
+    delete profile.password;
+    delete profile.is_verified;
+    delete profile.verified_code;
+    delete profile.role;
+    delete profile.provider;
+
+    return Promise.resolve({
+      user: profile,
+      point: point[0].count,
+      numberOfWins: game[0].numberOfWins,
+      numberOfLoses: game[0].numberOfMatches - game[0].numberOfWins,
+    });
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -238,4 +304,5 @@ module.exports = {
   aggregate,
   computePointUser,
   computePoinLogsUser,
+  findUserProfile,
 };

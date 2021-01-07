@@ -402,3 +402,17 @@ module.exports.giveaway = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.getUserProfile = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await userService.findUserProfile(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ ...result.value });
+  } catch (error) {
+    return next(error);
+  }
+};
