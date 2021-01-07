@@ -7,9 +7,6 @@ const transactionSrv = require('../services/transaction.service');
 const settingSrv = require('../services/setting.service');
 const { sortObject } = require('../../utils/f');
 
-// eslint-disable-next-line prefer-const
-let countWebhook = 0;
-
 module.exports.generateTransaction = async (req, res, next) => {
   try {
     const { _id: userId } = req.user;
@@ -90,9 +87,7 @@ module.exports.vnpayWebhook = async (req, res) => {
           .json({ RspCode: '01', Message: 'Transaction is not exist' });
 
       if (rspCode !== '00') {
-        if (countWebhook === 2) {
-          await transactionSrv.updateStatusTransaction(transactionId, 'FAILED');
-        }
+        await transactionSrv.updateStatusTransaction(transactionId, 'FAILED');
 
         return res.status(200).json({ RspCode: rspCode, Message: 'Fail' });
       }

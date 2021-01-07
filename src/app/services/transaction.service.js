@@ -1,6 +1,5 @@
 const Result = require('folktale/result');
 const generateSafeId = require('generate-safe-id');
-const _ = require('lodash');
 
 const mongo = require('../../core/mongo.core');
 const { VNPAY_CHARGE } = require('../constants/coin.constant');
@@ -82,7 +81,8 @@ const topUpPoint = async transactionId => {
           _id: generateSafeId(),
           status: 'PAID',
           created_at: new Date().getTime(),
-          transaction_id: _.get(transaction, 'ops.0._id'),
+          // eslint-disable-next-line no-underscore-dangle
+          transaction_id: transaction._id,
         },
         { session }
       );
