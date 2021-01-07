@@ -282,12 +282,14 @@ const findUserProfile = async userId => {
     delete profile.role;
     delete profile.provider;
 
-    return Promise.resolve({
-      user: profile,
-      point: point[0].count,
-      numberOfWins: game[0].numberOfWins,
-      numberOfLoses: game[0].numberOfMatches - game[0].numberOfWins,
-    });
+    return Promise.resolve(
+      Result.Ok({
+        user: profile,
+        point: point[0].count,
+        number_of_wins: game[0].numberOfWins,
+        number_of_loses: game[0].numberOfMatches - game[0].numberOfWins,
+      })
+    );
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
