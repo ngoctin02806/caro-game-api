@@ -6,6 +6,7 @@ const paymentSrv = require('../services/payment.service');
 const transactionSrv = require('../services/transaction.service');
 const settingSrv = require('../services/setting.service');
 const { sortObject } = require('../../utils/f');
+const httpErrorsHelper = require('../../lib/httpErrorsHelper');
 
 module.exports.generateTransaction = async (req, res, next) => {
   try {
@@ -45,6 +46,53 @@ module.exports.generateTransaction = async (req, res, next) => {
       default:
         return res.status(200).json({});
     }
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getAllTransactions = async (req, res, next) => {
+  try {
+    const { _id: userId } = req.user;
+    const { offset, limit } = req.query;
+
+    const transactions = await transactionSrv.findAllTransactions({
+      userId,
+      offset,
+      limit,
+    });
+
+    if (transactions.value instanceof Error) throw transactions.value;
+
+    return res.status(200).json({
+      total: transactions.value.total,
+      offset: parseInt(offset, 10),
+      limit: parseInt(limit, 10),
+      transactions: transactions.value.transactions,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getAllTransactionHistories = async (req, res, next) => {
+  try {
+    const { transactionId } = req.params;
+
+    const transaction = await transactionSrv.findOne(transactionId);
+
+    if (transaction.value instanceof Error) throw transaction.value;
+
+    if (!transaction.value)
+      return res.status(400).json(httpErrorsHelper.transactionNotExist());
+
+    const histories = await transactionSrv.findAllTransactionHistories(
+      transactionId
+    );
+
+    if (histories.value instanceof Error) throw histories.value;
+
+    return res.status(200).json({ histories: histories.value });
   } catch (error) {
     return next(error);
   }

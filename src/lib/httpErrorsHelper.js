@@ -78,4 +78,8 @@ module.exports = {
     new createError(400, 'user does not enough point', {
       errors: [{ code: 7017, message: 'User does not enough point' }],
     }),
+  transactionNotExist: () =>
+    new createError(400, 'transaction is not exist', {
+      errors: [{ code: 7018, message: 'Transaction is not exist' }],
+    }),
 };

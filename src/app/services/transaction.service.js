@@ -1,5 +1,6 @@
 const Result = require('folktale/result');
 const generateSafeId = require('generate-safe-id');
+const config = require('config');
 
 const mongo = require('../../core/mongo.core');
 const { VNPAY_CHARGE } = require('../constants/coin.constant');
@@ -113,8 +114,58 @@ const topUpPoint = async transactionId => {
   }
 };
 
+const findAllTransactions = async ({
+  userId,
+  offset = 1,
+  limit = config.get('LIMIT'),
+}) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const transactions = await collection
+      .aggregate([
+        {
+          $match: {
+            created_by: userId,
+          },
+        },
+        {
+          $skip: (parseInt(offset, 10) - 1) * parseInt(limit, 10),
+        },
+        {
+          $limit: parseInt(limit, 10),
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(
+      Result.Ok({ transactions, total: transactions.length })
+    );
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const findAllTransactionHistories = async transactionId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(HIS_COLLECTION);
+
+    const histories = await collection
+      .find({ transaction_id: transactionId })
+      .toArray();
+
+    return Promise.resolve(Result.Ok(histories));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   findOne,
   topUpPoint,
   updateStatusTransaction,
+  findAllTransactions,
+  findAllTransactionHistories,
 };

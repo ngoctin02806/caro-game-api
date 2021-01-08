@@ -20,4 +20,16 @@ router.get(
   paymentController.vnpayWebhook
 );
 
+router.get(
+  '/payments/transactions',
+  authMiddleware,
+  paymentController.getAllTransactions
+);
+
+router.get(
+  '/payments/transactions/:transactionId/histories',
+  authMiddleware,
+  paymentController.getAllTransactionHistories
+);
+
 module.exports = router;
