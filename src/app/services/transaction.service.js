@@ -131,6 +131,11 @@ const findAllTransactions = async ({
           },
         },
         {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
           $skip: (parseInt(offset, 10) - 1) * parseInt(limit, 10),
         },
         {
