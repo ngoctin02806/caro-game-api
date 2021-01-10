@@ -100,7 +100,12 @@ const findAll = async () => {
       ])
       .toArray();
 
-    return Promise.resolve(Result.Ok(games));
+    const formattedData = [];
+    games.map(
+      data => formattedData.push({ ...data._id, steps_count: data.steps_count }) // eslint-disable-line
+    );
+
+    return Promise.resolve(Result.Ok(formattedData));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
