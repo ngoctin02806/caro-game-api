@@ -47,4 +47,48 @@ const updateGameWinner = async (gameId, winner) => {
   }
 };
 
-module.exports = { insertOne, updateGameWinner, findOne };
+const findOneGameIncludeInforUser = async gameId => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const game = await collection
+      .aggregate([
+        {
+          $match: {
+            _id: gameId,
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'players',
+          },
+        },
+        {
+          $project: {
+            'players.password': 0,
+            'players.role': 0,
+            'players.is_verified': 0,
+            'players.verified_code': 0,
+            'players.has_topup': 0,
+            'players.provider': 0,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(game[0]));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+module.exports = {
+  insertOne,
+  updateGameWinner,
+  findOne,
+  findOneGameIncludeInforUser,
+};

@@ -108,3 +108,17 @@ module.exports.computePointForUser = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.getGameById = async (req, res, next) => {
+  try {
+    const { gameId } = req.params;
+
+    const game = await gameService.findOneGameIncludeInforUser(gameId);
+
+    if (game.value instanceof Error) throw game.value;
+
+    return res.status(200).json({ ...game.value });
+  } catch (error) {
+    return next(error);
+  }
+};

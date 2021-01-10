@@ -21,4 +21,6 @@ router.post(
   gameController.computePointForUser
 );
 
+router.get('/games/:gameId', gameController.getGameById);
+
 module.exports = router;

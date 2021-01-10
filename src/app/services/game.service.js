@@ -5,6 +5,7 @@ const mongo = require('../../core/mongo.core');
 const { PUBLIC_ROOM } = require('../constants/room.constant');
 
 const COLLECTION = 'rooms';
+const GAME_COLLECTION = 'games';
 
 const insertOne = async data => {
   try {
@@ -105,6 +106,27 @@ const getRoom = async roomId => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
+    const gameCollection = db.collection(GAME_COLLECTION);
+
+    const gameIds = await gameCollection
+      .aggregate([
+        {
+          $match: {
+            room_id: roomId,
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+          },
+        },
+      ])
+      .toArray();
 
     const room = await collection
       .aggregate([
@@ -133,7 +155,7 @@ const getRoom = async roomId => {
       ])
       .toArray();
 
-    return Promise.resolve(Result.Ok(room[0]));
+    return Promise.resolve(Result.Ok({ ...room[0], game_ids: gameIds }));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
   }
