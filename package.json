@@ -71,6 +71,8 @@
     "passport": "^0.4.1",
     "passport-facebook-token": "^4.0.0",
     "passport-google-token": "^0.1.2",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
     "qs": "^6.9.4",
     "query-string": "^6.13.8",
     "rxjs": "^6.6.3",

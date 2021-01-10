@@ -1,4 +1,5 @@
 const express = require('express');
+const passport = require('passport');
 
 const router = express.Router();
 const userRouter = require('./user.route');
@@ -7,8 +8,17 @@ const roomRouter = require('./room.route');
 const gameRouter = require('./game.route');
 const statisticRouter = require('./statistic.route');
 const paymentRouter = require('./payment.route');
+const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 router.use('/', userRouter);
+
+router.use(
+  passport.authenticate('jwt', {
+    session: false,
+    failWithError: httpErrorsHelper.unauthorized(),
+  })
+); // Secure api
+
 router.use('/', conversationRouter);
 router.use('/', roomRouter);
 router.use('/', gameRouter);
