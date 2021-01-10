@@ -64,6 +64,7 @@ const findAll = async () => {
             as: 'winner',
           },
         },
+        { $unwind: '$steps' },
         {
           $project: {
             'created_by._id': 1,
@@ -73,7 +74,27 @@ const findAll = async () => {
             'winner._id': 1,
             'winner.username': 1,
             created_at: 1,
-            steps: 1,
+            steps_count: {
+              $size: {
+                $filter: {
+                  input: '$steps',
+                  as: 'step',
+                  cond: { $ne: ['$$step', null] },
+                },
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              _id: '$_id',
+              created_by: '$created_by',
+              players: '$players',
+              winner: '$winner',
+              created_at: '$created_at',
+            },
+            steps_count: { $sum: '$steps_count' },
           },
         },
       ])
