@@ -50,3 +50,15 @@ module.exports.updateGameWinner = async (req, res, next) => {
     return next(err);
   }
 };
+
+module.exports.getAll = async (req, res, next) => {
+  try {
+    const games = await gameService.findAll();
+
+    if (games.value instanceof Error) throw games.value;
+
+    return res.status(200).json({ data: games.value });
+  } catch (error) {
+    return next(error);
+  }
+};

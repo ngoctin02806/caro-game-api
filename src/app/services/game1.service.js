@@ -34,4 +34,55 @@ const updateGameWinner = async (gameId, winner) => {
   }
 };
 
-module.exports = { insertOne, updateGameWinner };
+const findAll = async () => {
+  const collection = mongo.db().collection(COLLECTION);
+
+  try {
+    const games = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'created_by',
+            foreignField: '_id',
+            as: 'created_by',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'players',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'winner_id',
+            foreignField: '_id',
+            as: 'winner',
+          },
+        },
+        {
+          $project: {
+            'created_by._id': 1,
+            'created_by.username': 1,
+            'players._id': 1,
+            'players.username': 1,
+            'winner._id': 1,
+            'winner.username': 1,
+            created_at: 1,
+            steps: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(games));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+module.exports = { insertOne, updateGameWinner, findAll };
