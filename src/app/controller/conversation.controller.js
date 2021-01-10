@@ -9,6 +9,8 @@ const {
 
 const conversationService = require('../services/conversation.service');
 const gameService = require('../services/game.service');
+const roomService = require('../services/room.service');
+const game1Service = require('../services/game1.service');
 
 module.exports.createAConversation = async (req, res, next) => {
   try {
@@ -123,6 +125,45 @@ module.exports.getAllMessagesByConversationId = async (req, res, next) => {
       offset: parseInt(offset), // eslint-disable-line
       limit: parseInt(limit), // eslint-disable-line
     });
+
+    if (messages.value instanceof Error) throw messages.value;
+
+    return res.status(200).json({
+      messages: messages.value,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getAllMessagesByGameId = async (req, res, next) => {
+  const { gameId } = req.params;
+
+  try {
+    const game = await game1Service.findGameById(gameId);
+    if (game instanceof Error) throw game.value;
+    if (!game.value) return res.status(400).json(httpErrorsHelper.gameNotExist);
+
+    const roomId = game.value.room_id;
+
+    const room = await roomService.findRoomById(roomId);
+    if (room instanceof Error) throw room.value;
+    if (!room.value) {
+      return res.status(400).json(httpErrorsHelper.roomIsNotExist());
+    }
+
+    const conversation = await conversationService.findOneConversation({
+      room_id: roomId, //eslint-disable-line
+    });
+    if (conversation.value instanceof Error) throw conversation.value;
+    if (!conversation.value)
+      return res.status(400).json(httpErrorsHelper.conversationNotExist());
+
+    const conversationId = conversation.value._id; // eslint-disable-line
+
+    const messages = await conversationService.findAllMessagesByConversationId(
+      conversationId
+    );
 
     if (messages.value instanceof Error) throw messages.value;
 

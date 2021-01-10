@@ -111,4 +111,17 @@ const findAll = async () => {
   }
 };
 
-module.exports = { insertOne, updateGameWinner, findAll };
+const findGameById = async gameId => {
+  const collection = mongo.db().collection(COLLECTION);
+  try {
+    const game = await collection
+      .aggregate([{ $match: { _id: gameId } }])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(game[0]));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+module.exports = { insertOne, updateGameWinner, findAll, findGameById };

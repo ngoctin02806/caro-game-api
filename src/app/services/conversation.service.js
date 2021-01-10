@@ -138,6 +138,50 @@ const findAConversationData = async conversationId => {
   }
 };
 
+const findConversationByRoomId = async roomId => {
+  const collection = mongo.db().collection(COLLECTION);
+  try {
+    const conversation = await collection
+      .aggregate([{ $match: { room_id: roomId } }])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(conversation[0]));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const findAllMessagesByConversationId = async conversationId => {
+  const collection = mongo.db().collection(MSG_COLLECTION);
+  try {
+    const messages = await collection
+      .aggregate([
+        { $match: { conversation_id: conversationId } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'created_by',
+            foreignField: '_id',
+            as: 'created_by',
+          },
+        },
+        {
+          $project: {
+            content: 1,
+            'created_by.username': 1,
+            'created_by.avatar': 1,
+            created_at: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(messages));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   insertOne,
   findOneConversation,
@@ -146,4 +190,6 @@ module.exports = {
   findAllMessages,
   findConversationByParticipant,
   findAConversationData,
+  findConversationByRoomId,
+  findAllMessagesByConversationId,
 };

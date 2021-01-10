@@ -32,4 +32,10 @@ router.get(
   conversationController.getAllMessagesByConversationId
 );
 
+router.get(
+  '/conversation/game/:gameId/messages',
+  authMiddleware,
+  conversationController.getAllMessagesByGameId
+);
+
 module.exports = router;

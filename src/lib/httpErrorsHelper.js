@@ -60,10 +60,14 @@ module.exports = {
     }),
   unableToBlockYourSelf: () =>
     new createError(400, "you can't block yourself", {
-      errors: [{ code: 400, message: "You can't block yourself" }],
+      errors: [{ code: 7012, message: "You can't block yourself" }],
     }),
   unableToBlockAnotherAdmin: () =>
     new createError(400, "you can't block another admin", {
-      errors: [{ code: 400, message: "You can't block another admin" }],
+      errors: [{ code: 7013, message: "You can't block another admin" }],
+    }),
+  roomIsNotExist: () =>
+    new createError(400, 'room is not exist', {
+      errors: [{ code: 7014, message: 'Room is not exist' }],
     }),
 };
