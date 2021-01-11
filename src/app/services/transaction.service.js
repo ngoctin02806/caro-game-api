@@ -123,6 +123,8 @@ const findAllTransactions = async ({
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
+    const total = await collection.find({ created_by: userId }).count();
+
     const transactions = await collection
       .aggregate([
         {
@@ -144,9 +146,7 @@ const findAllTransactions = async ({
       ])
       .toArray();
 
-    return Promise.resolve(
-      Result.Ok({ transactions, total: transactions.length })
-    );
+    return Promise.resolve(Result.Ok({ transactions, total }));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
