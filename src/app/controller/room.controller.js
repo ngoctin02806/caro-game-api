@@ -10,7 +10,7 @@ const { FULL_SLOT, HAS_JOINED } = require('../constants/room.constant');
 module.exports.createRoom = async (req, res, next) => {
   try {
     const { _id } = req.user;
-    const { type, room_secret, bet_level } = req.body; // eslint-disable-line
+    const { room_name, type, room_secret, bet_level } = req.body; // eslint-disable-line
 
     // Get user
     const user = await userService.getUserById(_id);
@@ -27,6 +27,7 @@ module.exports.createRoom = async (req, res, next) => {
 
     const newRoom = {
       _id: generateSafeId(),
+      room_name,
       players: new Array(_id),
       guests: new Array(0),
       created_by: _id,

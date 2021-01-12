@@ -85,6 +85,10 @@ module.exports.createAConversation = {
 module.exports.createARoom = {
   type: 'object',
   properties: {
+    room_name: {
+      type: 'string',
+      maxLength: 20,
+    },
     type: {
       type: 'string',
       enum: [PRIVATE_ROOM, PUBLIC_ROOM],
@@ -99,7 +103,7 @@ module.exports.createARoom = {
       maximum: 100,
     },
   },
-  required: ['type', 'bet_level', 'room_secret'],
+  required: ['type', 'bet_level', 'room_secret', 'room_name'],
 };
 
 module.exports.roomSecret = {
