@@ -16,4 +16,10 @@ router.post(
 
 router.get('/game/get-all', adminAuthMiddleware, gameController.getAll);
 
+router.get(
+  '/game/user/:userId',
+  adminAuthMiddleware,
+  gameController.getGamesByUserId
+);
+
 module.exports = router;

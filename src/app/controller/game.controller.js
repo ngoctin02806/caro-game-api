@@ -62,3 +62,17 @@ module.exports.getAll = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.getGamesByUserId = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const games = await gameService.findByUserId(userId);
+
+    if (games.value instanceof Error) throw games.value;
+
+    return res.status(200).json({ data: games.value });
+  } catch (error) {
+    return next(error);
+  }
+};
