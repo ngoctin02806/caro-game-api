@@ -12,6 +12,8 @@ const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 router.use('/', userRouter);
 
+router.use('/', paymentRouter);
+
 router.use(
   passport.authenticate('jwt', {
     session: false,
@@ -23,6 +25,5 @@ router.use('/', conversationRouter);
 router.use('/', roomRouter);
 router.use('/', gameRouter);
 router.use('/', statisticRouter);
-router.use('/', paymentRouter);
 
 module.exports = router;
