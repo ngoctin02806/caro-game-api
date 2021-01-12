@@ -164,6 +164,7 @@ const findByUserId = async userId => {
             'created_by.username': 1,
             'players._id': 1,
             'players.username': 1,
+            'players.avatar': 1,
             'winner._id': 1,
             'winner.username': 1,
             created_at: 1,
