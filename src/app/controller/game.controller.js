@@ -122,3 +122,18 @@ module.exports.getGameById = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.getAllMessagesOfGame = async (req, res, next) => {
+  try {
+    const { gameId } = req.params;
+    const { offset, limit } = req.query;
+
+    const data = await gameService.findAllMessages(gameId, { offset, limit });
+
+    if (data.value instanceof Error) throw data.value;
+
+    return res.status(200).json(data.value);
+  } catch (error) {
+    return next(error);
+  }
+};

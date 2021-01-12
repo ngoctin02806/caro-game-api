@@ -23,4 +23,6 @@ router.post(
 
 router.get('/games/:gameId', gameController.getGameById);
 
+router.get('/games/:gameId/messages', gameController.getAllMessagesOfGame);
+
 module.exports = router;

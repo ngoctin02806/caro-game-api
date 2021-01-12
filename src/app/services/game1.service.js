@@ -1,9 +1,11 @@
 const Result = require('folktale/result');
 const { get } = require('lodash');
+const config = require('config');
 
 const mongo = require('../../core/mongo.core');
 
 const COLLECTION = 'games';
+const MESSAGE_COLLECTION = 'messages';
 
 const findOne = async gameId => {
   try {
@@ -86,9 +88,45 @@ const findOneGameIncludeInforUser = async gameId => {
   }
 };
 
+const findAllMessages = async (
+  gameId,
+  { offset = 1, limit = config.get('LIMIT') }
+) => {
+  try {
+    const db = mongo.db();
+    const messageCollection = db.collection(MESSAGE_COLLECTION);
+
+    const messages = await messageCollection
+      .aggregate([
+        {
+          $match: {
+            game_id: gameId,
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
+          $skip: (offset - 1) * limit,
+        },
+        {
+          $limit: limit,
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok({ offset, limit, messages }));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   insertOne,
   updateGameWinner,
   findOne,
   findOneGameIncludeInforUser,
+  findAllMessages,
 };
