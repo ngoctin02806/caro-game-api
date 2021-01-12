@@ -97,6 +97,7 @@ const findAll = async () => {
             steps_count: { $sum: '$steps_count' },
           },
         },
+        { $sort: { '_id.created_at': -1 } },
       ])
       .toArray();
 
@@ -191,6 +192,7 @@ const findByUserId = async userId => {
             steps_count: { $sum: '$steps_count' },
           },
         },
+        { $sort: { '_id.created_at': -1 } },
       ])
       .toArray();
 
