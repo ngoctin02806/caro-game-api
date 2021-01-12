@@ -79,6 +79,8 @@ module.exports.register = async (req, res, next) => {
       _id: generateSafeId(),
       username,
       email,
+      avatar:
+        'https://i.ibb.co/7QK7Ynv/Cute-Girl-Gaming-Holding-Joystick-Cartoon-Vector-Icon-Illustration-People-Technology-Icon-Concept-Is.jpg',
       password: hashPassword,
       is_verified: false,
       verified_code: verifiedCode,

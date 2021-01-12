@@ -218,7 +218,7 @@ const findEmptyRoom = async () => {
         },
         {
           $match: {
-            room_size: { $lt: 2 },
+            room_size: { $eq: 1 },
           },
         },
       ])
