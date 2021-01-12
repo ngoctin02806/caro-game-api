@@ -202,7 +202,7 @@ const findEmptyRoom = async () => {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
-    const room = await collection
+    let room = await collection
       .aggregate([
         {
           $match: {
@@ -223,6 +223,30 @@ const findEmptyRoom = async () => {
         },
       ])
       .toArray();
+
+    if (!room.length) {
+      room = await collection
+        .aggregate([
+          {
+            $match: {
+              type: PUBLIC_ROOM,
+            },
+          },
+          {
+            $project: {
+              room_size: {
+                $size: '$players',
+              },
+            },
+          },
+          {
+            $match: {
+              room_size: { $lt: 2 },
+            },
+          },
+        ])
+        .toArray();
+    }
 
     return Promise.resolve(Result.Ok(room[0]));
   } catch (error) {
