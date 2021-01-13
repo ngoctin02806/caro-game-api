@@ -80,6 +80,8 @@ module.exports.register = async (req, res, next) => {
       _id: generateSafeId(),
       username,
       email,
+      avatar:
+        'https://i.ibb.co/7QK7Ynv/Cute-Girl-Gaming-Holding-Joystick-Cartoon-Vector-Icon-Illustration-People-Technology-Icon-Concept-Is.jpg',
       password: hashPassword,
       is_verified: false,
       verified_code: verifiedCode,
@@ -133,9 +135,20 @@ module.exports.activateAccount = async (req, res, next) => {
 
     if (result.value instanceof Error) throw result.value;
 
+    const newToken = await jwtHelper.sign({
+      _id: user.value._id, // eslint-disable-line
+      email: user.value.email,
+      _role: user.value.role,
+      _verified: true,
+    });
+
     return res.status(200).json({
       data: {
         message: 'Activate successfully',
+        auth: {
+          token: newToken,
+          expire_in: new Date().getTime() + 3 * 60 * 60 * 1000, // 3h
+        },
       },
     });
   } catch (error) {
@@ -400,15 +413,22 @@ module.exports.getAllUsers = async (req, res, next) => {
   }
 };
 
-module.exports.getUserProfile = async (req, res, next) => {
-  const { userId } = req.params;
-
+module.exports.giveaway = async (req, res, next) => {
   try {
+    const { _id: userId } = req.user;
+
     const user = await userService.getUserById(userId);
 
     if (user.value instanceof Error) throw user.value;
 
-    return res.status(200).json({ data: user.value });
+    if (user.value.has_topup)
+      return res.status(400).json(httpErrorsHelper.userHasTopUp());
+
+    const result = await userService.loginTopup(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ message: 'success' });
   } catch (error) {
     return next(error);
   }
@@ -437,6 +457,20 @@ module.exports.blockUser = async (req, res, next) => {
   }
 };
 
+module.exports.getUserProfile = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const result = await userService.findUserProfile(userId);
+
+    if (result.value instanceof Error) throw result.value;
+
+    return res.status(200).json({ ...result.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports.unBlockUser = async (req, res, next) => {
   const { userId } = req.params;
 
@@ -446,6 +480,22 @@ module.exports.unBlockUser = async (req, res, next) => {
     if (result.value instanceof Error) throw result.value;
 
     return res.status(200).json({ data: result.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.changePassword = async (req, res, next) => {
+  try {
+    const { new_password: newPassword } = req.body;
+    const { _id: userId } = req.user;
+
+    const salt = await bcryptjsHelper.genSalt(10);
+    const hashPassword = await bcryptjsHelper.hashPassword(salt, newPassword);
+
+    await userService.updateOne({ _id: userId }, { password: hashPassword });
+
+    return res.status(200).json({ message: 'success' });
   } catch (error) {
     return next(error);
   }

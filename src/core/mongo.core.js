@@ -48,9 +48,22 @@ const db = () => state.db;
 
 const client = () => state.client;
 
+const startTransaction = () => async func => {
+  const session = state.client.startSession();
+
+  try {
+    return await session.withTransaction(
+      async () => await func(session) // eslint-disable-line
+    );
+  } finally {
+    await session.endSession();
+  }
+};
+
 module.exports = {
   connect,
   close,
   db,
   client,
+  startTransaction,
 };

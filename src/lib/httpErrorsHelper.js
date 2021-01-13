@@ -42,9 +42,9 @@ module.exports = {
     new createError(400, 'code does not match', {
       errors: [{ code: 7007, message: 'code does not match' }],
     }),
-  gameNotExist: () =>
-    new createError(400, 'game is not exist', {
-      errors: [{ code: 7008, message: 'Game is not exist' }],
+  roomNotExist: () =>
+    new createError(400, 'room is not exist', {
+      errors: [{ code: 7008, message: 'Room is not exist' }],
     }),
   conversationNotExist: () =>
     new createError(400, 'conversation is not exist', {
@@ -56,7 +56,35 @@ module.exports = {
     }),
   userNotMatch: () =>
     new createError(400, 'participant does not match', {
-      errors: [{ code: 7011, message: 'participant does not match' }],
+      errors: [{ code: 7011, message: 'Participant does not match' }],
+    }),
+  userHasTopUp: () =>
+    new createError(400, 'user has login topup', {
+      errors: [{ code: 7012, message: 'User has login topup' }],
+    }),
+  roomSecretDoesNotMatch: () =>
+    new createError(400, 'room secret does not match', {
+      errors: [{ code: 7013, message: 'Room secret does not match' }],
+    }),
+  userIsNotExistInRoom: () =>
+    new createError(400, 'user is not exist in room', {
+      errors: [{ code: 7014, message: 'User is not exist in room' }],
+    }),
+  gameNotExist: () =>
+    new createError(400, 'game is not exist', {
+      errors: [{ code: 7015, message: 'Game is not exist' }],
+    }),
+  gameNotBelongToRoom: () =>
+    new createError(400, 'game does not belong to room', {
+      errors: [{ code: 7016, message: 'Game does not belong to room' }],
+    }),
+  notEnoughPoint: () =>
+    new createError(400, 'user does not enough point', {
+      errors: [{ code: 7017, message: 'User does not enough point' }],
+    }),
+  transactionNotExist: () =>
+    new createError(400, 'transaction is not exist', {
+      errors: [{ code: 7018, message: 'Transaction is not exist' }],
     }),
   unableToBlockYourSelf: () =>
     new createError(400, "you can't block yourself", {

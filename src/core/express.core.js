@@ -52,13 +52,21 @@ module.exports = () =>
 
       /* eslint-disable-next-line no-unused-vars */
       app.use((error, req, res, next) => {
-        return res
-          .status(error.status || 500)
-          .json(
-            error.status
-              ? httpErrorsHelper.notFound()
-              : httpErrorsHelper.internalError(error.message)
-          );
+        switch (error.status) {
+          case 401:
+            return res
+              .status(error.status || 500)
+              .json(httpErrorsHelper.unauthorized());
+          case 404:
+            return res
+              .status(error.status || 500)
+              .json(httpErrorsHelper.notFound());
+
+          default:
+            return res
+              .status(error.status || 500)
+              .json(httpErrorsHelper.internalError(error.message));
+        }
       });
 
       app.listen(

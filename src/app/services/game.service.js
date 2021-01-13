@@ -2,8 +2,10 @@ const Result = require('folktale/result');
 const { get } = require('lodash');
 
 const mongo = require('../../core/mongo.core');
+const { PUBLIC_ROOM } = require('../constants/room.constant');
 
 const COLLECTION = 'rooms';
+const GAME_COLLECTION = 'games';
 
 const insertOne = async data => {
   try {
@@ -31,14 +33,14 @@ const findOneGame = async payload => {
   }
 };
 
-const updateRoom = async (roomId, players, guests) => {
+const updateRoom = async (roomId, players) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
 
     const result = await collection.updateOne(
       { _id: roomId },
-      { $set: { players, guests } }
+      { $set: { players } }
     );
 
     return Promise.resolve(Result.Ok(result));
@@ -47,7 +49,7 @@ const updateRoom = async (roomId, players, guests) => {
   }
 };
 
-const getAllRooms = async ({ offset, limit }) => {
+const getAllRooms = async (userId, { offset, limit }) => {
   try {
     const db = mongo.db();
     const collection = db.collection(COLLECTION);
@@ -72,15 +74,29 @@ const getAllRooms = async ({ offset, limit }) => {
         },
         {
           $project: {
-            'players._id': 1,
-            'players.username': 1,
-            'players.avatar': 1,
+            'players.password': 0,
+            'players.is_verified': 0,
+            'players.verified_code': 0,
+            'players.point': 0,
+            'players.has_topup': 0,
+            'players.role': 0,
+            'players.provider': 0,
+            'players.ref_id': 0,
           },
         },
       ])
       .toArray();
 
-    return Promise.resolve(Result.Ok({ rooms: result, count }));
+    const returnResult = result.map(r => {
+      if (r.created_by === userId) return r;
+
+      // eslint-disable-next-line no-param-reassign
+      delete r.room_secret;
+
+      return r;
+    });
+
+    return Promise.resolve(Result.Ok({ rooms: returnResult, count }));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
   }
@@ -89,9 +105,36 @@ const getAllRooms = async ({ offset, limit }) => {
 const getRoom = async roomId => {
   try {
     const db = mongo.db();
-    const result = await db
-      .collection(COLLECTION)
+    const collection = db.collection(COLLECTION);
+    const gameCollection = db.collection(GAME_COLLECTION);
+
+    const gameIds = await gameCollection
       .aggregate([
+        {
+          $match: {
+            room_id: roomId,
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    const room = await collection
+      .aggregate([
+        {
+          $match: {
+            _id: roomId,
+          },
+        },
         {
           $lookup: {
             from: 'users',
@@ -101,32 +144,113 @@ const getRoom = async roomId => {
           },
         },
         {
-          $lookup: {
-            from: 'users',
-            localField: 'guests',
-            foreignField: '_id',
-            as: 'guests',
-          },
-        },
-        {
-          $match: { _id: roomId },
-        },
-        {
           $project: {
-            'players._id': 1,
-            'players.username': 1,
-            'players.avatar': 1,
-            'guests._id': 1,
-            'guests.username': 1,
-            'guests.avatar': 1,
+            'players.password': 0,
+            'players.role': 0,
+            'players.is_verified': 0,
+            'players.verified_code': 0,
+            'players.provider': 0,
           },
         },
       ])
       .toArray();
 
-    return Promise.resolve(Result.Ok(result[0]));
+    return Promise.resolve(Result.Ok({ ...room[0], game_ids: gameIds }));
   } catch (err) {
     return Promise.resolve(Result.Error(err));
+  }
+};
+
+const appendPlayerInRoom = async (roomId, userId, players) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.update(
+      { _id: roomId },
+      { $addToSet: { players: userId } }
+    );
+
+    if (players.length === 1) {
+      await collection.update({ _id: roomId }, { $set: { status: true } });
+    }
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const removePlayerInRoom = async (roomId, userId) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.update(
+      { _id: roomId },
+      { $pull: { players: userId }, $set: { status: false } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const findEmptyRoom = async () => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    let room = await collection
+      .aggregate([
+        {
+          $match: {
+            type: PUBLIC_ROOM,
+          },
+        },
+        {
+          $project: {
+            room_size: {
+              $size: '$players',
+            },
+          },
+        },
+        {
+          $match: {
+            room_size: { $eq: 1 },
+          },
+        },
+      ])
+      .toArray();
+
+    if (!room.length) {
+      room = await collection
+        .aggregate([
+          {
+            $match: {
+              type: PUBLIC_ROOM,
+            },
+          },
+          {
+            $project: {
+              room_size: {
+                $size: '$players',
+              },
+            },
+          },
+          {
+            $match: {
+              room_size: { $lt: 2 },
+            },
+          },
+        ])
+        .toArray();
+    }
+
+    return Promise.resolve(Result.Ok(room[0]));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
   }
 };
 
@@ -134,6 +258,9 @@ module.exports = {
   insertOne,
   findOneGame,
   updateRoom,
-  getAllRooms,
   getRoom,
+  getAllRooms,
+  appendPlayerInRoom,
+  removePlayerInRoom,
+  findEmptyRoom,
 };

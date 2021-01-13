@@ -5,12 +5,14 @@ const router = express.Router();
 const userController = require('../app/controller/user.controller');
 
 const validator = require('../utils/validator');
-const authMiddleware = require('../middlewares/auth.middleware');
-const adminAuthMiddleware = require('../middlewares/adminAuth.middleware');
-const validateEmailMiddleware = require('../middlewares/validateEmail.middleware'); // eslint-disable-line
 const schema = require('../schema');
 
-router.post('/me/login', validator(schema.login), userController.login);
+router.post(
+  '/me/login',
+  passport.authenticate('login-local', { session: false }),
+  validator(schema.login),
+  userController.login
+);
 
 router.post(
   '/me/register',
@@ -21,18 +23,18 @@ router.post(
 router.post(
   '/me/account/activate',
   validator(schema.activeCode),
-  authMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.activateAccount
 );
 
 router.post(
   '/me/verified-code/send',
-  authMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.getVerifiedCode
 );
 
 router.post(
-  '/me/account/password/reset',
+  '/user/account/password/forget',
   validator(schema.changePasswordThroughEmail),
   userController.sendMailToChangePassword
 );
@@ -52,33 +54,64 @@ router.post(
   userController.facebookLogin
 );
 
-router.get('/me/user-online', authMiddleware, userController.getOnlineFriends);
+router.get(
+  '/me/user-online',
+  passport.authenticate('jwt', { session: false }),
+  userController.getOnlineFriends
+);
 
-router.get('/me/profile', authMiddleware, userController.getProfile);
+router.get(
+  '/me/profile',
+  passport.authenticate('jwt', { session: false }),
+  userController.getProfile
+);
 
-router.get('/user/get-all', adminAuthMiddleware, userController.getAllUsers);
+router.post(
+  '/users/coins/giveaway',
+  passport.authenticate('jwt', { session: false }),
+  userController.giveaway
+);
+
+router.get(
+  '/users/:userId/profile',
+  passport.authenticate('jwt', { session: false }),
+  userController.getUserProfile
+);
+
+router.post(
+  '/user/account/password/reset',
+  passport.authenticate('jwt', { session: false }),
+  validator(schema.renewPassword),
+  userController.changePassword
+);
+
+router.get(
+  '/user/get-all',
+  passport.authenticate('jwt', { session: false }),
+  userController.getAllUsers
+);
 
 router.get(
   '/user/profile/:userId',
-  authMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.getUserProfile
 );
 
 router.post(
   '/user/block/:userId',
-  adminAuthMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.blockUser
 );
 
 router.post(
   '/user/unblock/:userId',
-  adminAuthMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.unBlockUser
 );
 
 router.post(
   '/user/search-by-username-and-email',
-  authMiddleware,
+  passport.authenticate('jwt', { session: false }),
   userController.searchByUsernameAndEmail
 );
 

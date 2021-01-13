@@ -1,0 +1,6 @@
+module.exports = {
+  PRIVATE_ROOM: 'PRIVATE_ROOM',
+  PUBLIC_ROOM: 'PUBLIC_ROOM',
+  FULL_SLOT: 'FULL_SLOT',
+  HAS_JOINED: 'HAS_JOINED',
+};
