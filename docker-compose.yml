@@ -23,7 +23,7 @@ services:
       - VNPAY_RETURN_URL=${VNPAY_RETURN_URL}
       - VNPAY_IPN=${VNPAY_IPN}
       - VIRTUAL_HOST=api.hcmusedu.info
-      - VIRTUAL_PORT=8010
+      - VIRTUAL_PORT=8000
       - MONGO_URL=${MONGO_URL}
       - PORT=8000
       - NODE_ENV=development
