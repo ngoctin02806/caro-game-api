@@ -15,11 +15,7 @@ router.post(
 
 router.get('/game/get-all', gameController.getAll);
 
-router.get(
-  '/game/user/:userId',
-
-  gameController.getGamesByUserId
-);
+router.get('/game/user/:userId', gameController.getGamesByUserId);
 
 router.post('/game/update-winner/:gameId', gameController.updateGameWinner);
 
