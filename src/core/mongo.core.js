@@ -52,7 +52,7 @@ const startTransaction = () => async func => {
   const session = state.client.startSession();
 
   try {
-    await session.withTransaction(
+    return await session.withTransaction(
       async () => await func(session) // eslint-disable-line
     );
   } finally {

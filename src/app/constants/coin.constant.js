@@ -1,3 +1,5 @@
 module.exports = {
   LOGIN_TOPUP: 'LOGIN_TOPUP',
+  PLAY_GAME: 'PLAY_GAME',
+  VNPAY_CHARGE: 'VNPAY_CHARGE',
 };

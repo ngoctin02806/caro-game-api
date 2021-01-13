@@ -27,6 +27,9 @@ const aggregateRankingTop = async () => {
           },
         },
         {
+          $sort: { point_total: -1 },
+        },
+        {
           $lookup: {
             from: 'users',
             localField: '_id',

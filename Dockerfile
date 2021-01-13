@@ -11,5 +11,7 @@ RUN npm install --production
 COPY . .
 
 EXPOSE 8000
+EXPOSE 80
+EXPOSE 443
 
 CMD [ "node", "src/bootstrap.js" ]

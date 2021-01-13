@@ -1,4 +1,5 @@
 const { PRIVATE_ROOM, PUBLIC_ROOM } = require('./app/constants/room.constant');
+const { MOMO, VNPAY } = require('./app/constants/payment.constant');
 
 module.exports.login = {
   type: 'object',
@@ -84,6 +85,10 @@ module.exports.createAConversation = {
 module.exports.createARoom = {
   type: 'object',
   properties: {
+    room_name: {
+      type: 'string',
+      maxLength: 20,
+    },
     type: {
       type: 'string',
       enum: [PRIVATE_ROOM, PUBLIC_ROOM],
@@ -98,5 +103,84 @@ module.exports.createARoom = {
       maximum: 100,
     },
   },
-  required: ['type', 'bet_level', 'room_secret'],
+  required: ['type', 'bet_level', 'room_secret', 'room_name'],
+};
+
+module.exports.roomSecret = {
+  type: 'object',
+  properties: {
+    room_secret: {
+      type: 'string',
+    },
+  },
+  required: ['room_secret'],
+};
+
+module.exports.createAGame = {
+  type: 'object',
+  properties: {
+    players: {
+      type: 'array',
+      item: {
+        type: 'string',
+      },
+    },
+  },
+  required: ['players'],
+};
+
+module.exports.point = {
+  type: 'object',
+  properties: {
+    point: {
+      type: 'number',
+    },
+    chess_board: {
+      type: 'array',
+      item: {
+        type: 'array',
+        item: 'string',
+      },
+    },
+    user_id: {
+      type: 'string',
+    },
+  },
+  required: ['point', 'chess_board'],
+};
+
+module.exports.transaction = {
+  type: 'object',
+  properties: {
+    type: {
+      type: 'string',
+      enum: [MOMO, VNPAY],
+    },
+    amount: {
+      type: 'number',
+    },
+    option: {
+      type: 'object',
+      properties: {
+        description: {
+          type: 'string',
+        },
+        user_id: {
+          type: 'string',
+        },
+      },
+    },
+  },
+  required: ['amount', 'option', 'type'],
+};
+
+module.exports.renewPassword = {
+  type: 'object',
+  properties: {
+    new_password: {
+      type: 'string',
+      minLength: 8,
+    },
+  },
+  required: ['new_password'],
 };

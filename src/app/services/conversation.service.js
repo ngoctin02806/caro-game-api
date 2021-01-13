@@ -138,6 +138,22 @@ const findAConversationData = async conversationId => {
   }
 };
 
+const appendUserInConversation = async (roomId, userId) => {
+  try {
+    const db = mongo.db();
+    const collection = db.collection(COLLECTION);
+
+    const result = await collection.update(
+      { room_id: roomId },
+      { $addToSet: { participants: userId } }
+    );
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   insertOne,
   findOneConversation,
@@ -146,4 +162,5 @@ module.exports = {
   findAllMessages,
   findConversationByParticipant,
   findAConversationData,
+  appendUserInConversation,
 };

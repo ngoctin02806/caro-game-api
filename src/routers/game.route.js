@@ -2,15 +2,27 @@ const express = require('express');
 
 const router = express.Router();
 
-const authMiddleware = require('../middlewares/auth.middleware');
 const gameController = require('../app/controller/game.controller');
 
-router.post('/game/create/:roomId', authMiddleware, gameController.createGame);
+const validator = require('../utils/validator');
+const schema = require('../schema');
 
 router.post(
-  '/game/update-winner/:gameId',
-  authMiddleware,
-  gameController.updateGameWinner
+  '/rooms/:roomId/games',
+  validator(schema.createAGame),
+  gameController.createGame
 );
+
+router.post('/game/update-winner/:gameId', gameController.updateGameWinner);
+
+router.post(
+  '/rooms/:roomId/games/:gameId/coins/charge',
+  validator(schema.point),
+  gameController.computePointForUser
+);
+
+router.get('/games/:gameId', gameController.getGameById);
+
+router.get('/games/:gameId/messages', gameController.getAllMessagesOfGame);
 
 module.exports = router;
