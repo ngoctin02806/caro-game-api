@@ -109,6 +109,18 @@ module.exports.computePointForUser = async (req, res, next) => {
   }
 };
 
+module.exports.getAll = async (req, res, next) => {
+  try {
+    const games = await gameService.findAll();
+
+    if (games.value instanceof Error) throw games.value;
+
+    return res.status(200).json({ data: games.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports.getGameById = async (req, res, next) => {
   try {
     const { gameId } = req.params;
@@ -133,6 +145,20 @@ module.exports.getAllMessagesOfGame = async (req, res, next) => {
     if (data.value instanceof Error) throw data.value;
 
     return res.status(200).json(data.value);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.getGamesByUserId = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const games = await gameService.findByUserId(userId);
+
+    if (games.value instanceof Error) throw games.value;
+
+    return res.status(200).json({ data: games.value });
   } catch (error) {
     return next(error);
   }

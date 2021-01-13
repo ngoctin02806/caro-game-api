@@ -14,6 +14,10 @@ module.exports = {
     new createError(401, 'unauthorized', {
       errors: [{ code: 7002, message: 'Unauthorized' }],
     }),
+  adminUnauthorized: () =>
+    new createError(401, 'admin unauthorized', {
+      errors: [{ code: 7002, message: 'Admin Unauthorized' }],
+    }),
   userNotExist: () =>
     new createError(400, 'user is not exist', {
       errors: [{ code: 7003, message: 'User is not exist' }],
@@ -81,5 +85,17 @@ module.exports = {
   transactionNotExist: () =>
     new createError(400, 'transaction is not exist', {
       errors: [{ code: 7018, message: 'Transaction is not exist' }],
+    }),
+  unableToBlockYourSelf: () =>
+    new createError(400, "you can't block yourself", {
+      errors: [{ code: 7012, message: "You can't block yourself" }],
+    }),
+  unableToBlockAnotherAdmin: () =>
+    new createError(400, "you can't block another admin", {
+      errors: [{ code: 7013, message: "You can't block another admin" }],
+    }),
+  roomIsNotExist: () =>
+    new createError(400, 'room is not exist', {
+      errors: [{ code: 7014, message: 'Room is not exist' }],
     }),
 };

@@ -10,6 +10,8 @@ const HIS_COLLECTION = 'transactionhistories';
 const POINT_COLLECTION = 'pointlogs';
 const USER_COLLECTION = 'users';
 
+// <BEGIN INSERT DATA>
+
 const findOne = async transactionId => {
   try {
     const db = mongo.db();
@@ -18,6 +20,17 @@ const findOne = async transactionId => {
     const transaction = await collection.findOne({ _id: transactionId });
 
     return Promise.resolve(Result.Ok(transaction));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const insertMany = async data => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+  try {
+    const result = await collection.insertMany(data);
+
+    return Promise.resolve(Result.Ok(result));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
@@ -50,6 +63,57 @@ const updateStatusTransaction = async (transactionId, transactionStatus) => {
     });
 
     return Promise.resolve(Result.Ok({ message: 'success' }));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+// </END INSERT DATA >
+
+const countSaleAmountByDay = async startDate => {
+  const collection = mongo.db().collection(COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+            created_at: { $gt: startDate },
+          },
+        },
+        {
+          $project: {
+            date: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              day_week: { $dayOfWeek: '$date' },
+            },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $sort: {
+            _id: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
@@ -173,4 +237,6 @@ module.exports = {
   updateStatusTransaction,
   findAllTransactions,
   findAllTransactionHistories,
+  insertMany,
+  countSaleAmountByDay,
 };

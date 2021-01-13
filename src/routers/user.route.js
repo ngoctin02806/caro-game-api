@@ -85,4 +85,34 @@ router.post(
   userController.changePassword
 );
 
+router.get(
+  '/user/get-all',
+  passport.authenticate('jwt', { session: false }),
+  userController.getAllUsers
+);
+
+router.get(
+  '/user/profile/:userId',
+  passport.authenticate('jwt', { session: false }),
+  userController.getUserProfile
+);
+
+router.post(
+  '/user/block/:userId',
+  passport.authenticate('jwt', { session: false }),
+  userController.blockUser
+);
+
+router.post(
+  '/user/unblock/:userId',
+  passport.authenticate('jwt', { session: false }),
+  userController.unBlockUser
+);
+
+router.post(
+  '/user/search-by-username-and-email',
+  passport.authenticate('jwt', { session: false }),
+  userController.searchByUsernameAndEmail
+);
+
 module.exports = router;

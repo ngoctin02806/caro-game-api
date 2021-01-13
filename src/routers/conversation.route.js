@@ -27,4 +27,9 @@ router.get(
   conversationController.getAllMessagesByConversationId
 );
 
+router.get(
+  '/conversation/game/:gameId/messages',
+  conversationController.getAllMessagesByGameId
+);
+
 module.exports = router;
