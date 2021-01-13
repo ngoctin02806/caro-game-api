@@ -471,6 +471,20 @@ module.exports.getUserProfile = async (req, res, next) => {
   }
 };
 
+module.exports.getUserProfile2 = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await userService.getUserById(userId);
+
+    if (user.value instanceof Error) throw user.value;
+
+    return res.status(200).json({ data: user.value });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports.unBlockUser = async (req, res, next) => {
   const { userId } = req.params;
 

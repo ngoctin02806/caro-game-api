@@ -94,7 +94,7 @@ router.get(
 router.get(
   '/user/profile/:userId',
   passport.authenticate('jwt', { session: false }),
-  userController.getUserProfile
+  userController.getUserProfile2
 );
 
 router.post(
