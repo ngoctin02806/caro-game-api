@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const querystring = require('qs');
 const sha256 = require('sha256');
 
@@ -151,4 +153,40 @@ module.exports.vnpayWebhook = async (req, res) => {
   } catch (error) {
     return res.status(200).json({ RspCode: '99', Message: 'Fail' });
   }
+};
+
+module.exports.momoWebhook = async (req, res) => {
+  const { body } = req;
+
+  const momoData = await settingSrv.findOne('MOMO_PAYMENT');
+
+  const rawData = `partnerCode=${body.partnerCode}&accessKey=${body.accessKey}&requestId=${body.requestId}&amount=${body.amount}&orderId=${body.orderId}&orderInfo=${body.orderInfo}&returnUrl=${body.returnUrl}&notifyUrl=${body.notifyUrl}&extraData=${body.extraData}`;
+
+  const signature = crypto
+    .createHmac('sha256', momoData.value.value.secret_key)
+    .update(rawData)
+    .digest('hex');
+
+  const transaction = await transactionSrv.findOne(body.orderId);
+
+  if (transaction.value instanceof Error) throw transaction.value;
+
+  if (!transaction.value) {
+    return res.status(200).json({ ...body, errorCode: 2, signature });
+  }
+
+  if (body.errorCode !== 0) {
+    await transactionSrv.updateStatusTransaction(body.orderId, 'FAILED');
+
+    return res.status(200).json({
+      ...body,
+      signature,
+    });
+  }
+
+  const data = await transactionSrv.topUpPoint(body.orderId);
+
+  if (data.value instanceof Error) throw data.value;
+
+  return res.status(200).json({ ...body, errorCode: 0, signature });
 };

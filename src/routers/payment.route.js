@@ -24,6 +24,11 @@ router.get(
   paymentController.vnpayWebhook
 );
 
+router.post(
+  '/payments/momo/transactions/webhook',
+  paymentController.momoWebhook
+);
+
 router.get(
   '/payments/transactions',
   passport.authenticate('jwt', {
