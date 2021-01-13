@@ -10,6 +10,11 @@ const paymentController = require('../app/controller/payment.controller');
 const httpErrorsHelper = require('../lib/httpErrorsHelper');
 
 router.post(
+  '/payments/momo/transactions/webhook',
+  paymentController.momoWebhook
+);
+
+router.post(
   '/payments/transactions',
   passport.authenticate('jwt', {
     session: false,
@@ -22,11 +27,6 @@ router.post(
 router.get(
   '/payments/vnpay/transactions/webhook',
   paymentController.vnpayWebhook
-);
-
-router.post(
-  '/payments/momo/transactions/webhook',
-  paymentController.momoWebhook
 );
 
 router.get(
