@@ -85,3 +85,124 @@ module.exports.countSaleAmountByDay = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.countSaleAmountByWeek = async (req, res, next) => {
+  try {
+    const data = await transactionService.countSaleAmountByWeek();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const formattedData = [];
+    data.value.map(item =>
+      // eslint-disable-next-line no-underscore-dangle
+      formattedData.push({ ...item._id, total_amount: item.total_amount })
+    );
+
+    const lastWeekCount = formattedData[formattedData.length - 1].week;
+    const result = [];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1, j = 0; i <= lastWeekCount; i++) {
+      if (i === formattedData[j].week) {
+        result.push({
+          week: formattedData[j].week.toString(),
+          total_amount: formattedData[j].total_amount,
+        });
+        // eslint-disable-next-line no-plusplus
+        j++;
+      } else {
+        result.push({ week: i, total_amount: 0 });
+      }
+    }
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.countSaleAmountByMonth = async (req, res, next) => {
+  const now = new Date();
+  const nowYear = now.getFullYear();
+
+  try {
+    const data = await transactionService.countSaleAmountByMonth(nowYear);
+
+    if (data.value instanceof Error) throw data.value;
+
+    const formattedData = [];
+    data.value.map(item =>
+      formattedData.push({
+        date: item._id.month + '/' + item._id.year, // eslint-disable-line
+        total_amount: item.total_amount,
+        month: item._id.month, // eslint-disable-line
+        year: item._id.year, // eslint-disable-line
+      })
+    );
+
+    const result = [];
+    const lastYear = nowYear - 1;
+    let j = 0;
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1; i <= 12; i++) {
+      if (formattedData[j].year !== lastYear) {
+        break;
+      } else if (i === formattedData[j].month) {
+        result.push(formattedData[j]);
+        // eslint-disable-next-line no-plusplus
+        j++;
+      } else {
+        result.push({
+          // eslint-disable-next-line prefer-template
+          date: i + '/' + lastYear,
+          total_amount: 0,
+          month: i,
+          year: lastYear,
+        });
+      }
+    }
+
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1; i <= 12 && j < formattedData.length; i++) {
+      if (formattedData[j].year !== nowYear) {
+        break;
+      } else if (i === formattedData[j].month) {
+        result.push(formattedData[j]);
+        // eslint-disable-next-line no-plusplus
+        j++;
+      } else {
+        result.push({
+          // eslint-disable-next-line prefer-template
+          date: i + '/' + nowYear,
+          total_amount: 0,
+          month: i,
+          year: nowYear,
+        });
+      }
+    }
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.countSaleAmountByYear = async (req, res, next) => {
+  try {
+    const data = await transactionService.countSaleAmountByYear();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map(item =>
+      result.push({
+        // eslint-disable-next-line no-underscore-dangle
+        year: item._id.year.toString(),
+        total_amount: item.total_amount,
+      })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};

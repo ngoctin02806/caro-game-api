@@ -10,8 +10,6 @@ const HIS_COLLECTION = 'transactionhistories';
 const POINT_COLLECTION = 'pointlogs';
 const USER_COLLECTION = 'users';
 
-// <BEGIN INSERT DATA>
-
 const findOne = async transactionId => {
   try {
     const db = mongo.db();
@@ -25,6 +23,7 @@ const findOne = async transactionId => {
   }
 };
 
+// <BEGIN INSERT DATA>
 const insertMany = async data => {
   const collection = mongo.db().collection(HIS_COLLECTION);
   try {
@@ -35,6 +34,7 @@ const insertMany = async data => {
     return Promise.resolve(Result.Error(error));
   }
 };
+// </END INSERT DATA >
 
 const updateStatusTransaction = async (transactionId, transactionStatus) => {
   try {
@@ -63,57 +63,6 @@ const updateStatusTransaction = async (transactionId, transactionStatus) => {
     });
 
     return Promise.resolve(Result.Ok({ message: 'success' }));
-  } catch (error) {
-    return Promise.resolve(Result.Error(error));
-  }
-};
-
-// </END INSERT DATA >
-
-const countSaleAmountByDay = async startDate => {
-  const collection = mongo.db().collection(COLLECTION);
-
-  try {
-    const result = await collection
-      .aggregate([
-        {
-          $addFields: {
-            date: {
-              $toDate: '$created_at',
-            },
-          },
-        },
-        {
-          $match: {
-            status: 'PAID',
-            created_at: { $gt: startDate },
-          },
-        },
-        {
-          $project: {
-            date: 1,
-            'transaction_id.amount': 1,
-          },
-        },
-        {
-          $group: {
-            _id: {
-              day_week: { $dayOfWeek: '$date' },
-            },
-            total_amount: {
-              $sum: '$transaction_id.amount',
-            },
-          },
-        },
-        {
-          $sort: {
-            _id: 1,
-          },
-        },
-      ])
-      .toArray();
-
-    return Promise.resolve(Result.Ok(result));
   } catch (error) {
     return Promise.resolve(Result.Error(error));
   }
@@ -231,6 +180,236 @@ const findAllTransactionHistories = async transactionId => {
   }
 };
 
+const countSaleAmountByDay = async startDate => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+            created_at: { $gt: startDate },
+          },
+        },
+        {
+          $project: {
+            date: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $group: {
+            _id: {
+              day_week: { $dayOfWeek: '$date' },
+            },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $sort: {
+            _id: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const countSaleAmountByWeek = async () => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+  const now = new Date();
+  const nowMonth = now.getMonth() + 1;
+  const nowYear = now.getFullYear();
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $addFields: {
+            week: { $week: '$date' },
+            month: { $month: '$date' },
+            year: { $year: '$date' },
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            date: 1,
+            week: 1,
+            month: 1,
+            year: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+            month: nowMonth,
+            year: nowYear,
+          },
+        },
+        {
+          $group: {
+            _id: { week: { $sum: ['$week', 1] } },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $sort: {
+            '_id.week': 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
+const countSaleAmountByMonth = async nowYear => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $addFields: {
+            month: { $month: '$date' },
+            year: { $year: '$date' },
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            created_at: 1,
+            date: 1,
+            month: 1,
+            year: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+            year: { $in: [nowYear - 1, nowYear] },
+          },
+        },
+        {
+          $group: {
+            _id: { month: '$month', year: '$year' },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            total_amount: 1,
+            order: {
+              $sum: ['$_id.year', { $divide: ['$_id.month', 100] }],
+            },
+          },
+        },
+        {
+          $sort: {
+            order: 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
+const countSaleAmountByYear = async () => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $addFields: {
+            year: { $year: '$date' },
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            date: 1,
+            year: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+          },
+        },
+        {
+          $group: {
+            _id: { year: '$year' },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $sort: {
+            '_id.year': 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
 module.exports = {
   findOne,
   topUpPoint,
@@ -239,4 +418,7 @@ module.exports = {
   findAllTransactionHistories,
   insertMany,
   countSaleAmountByDay,
+  countSaleAmountByWeek,
+  countSaleAmountByMonth,
+  countSaleAmountByYear,
 };
