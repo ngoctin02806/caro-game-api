@@ -359,6 +359,26 @@ const findUserProfile = async userId => {
   }
 };
 
+const statsAccountProvider = async () => {
+  const collection = mongo.db().collection(COLLECTION);
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $group: {
+            _id: { provider: '$provider' },
+            count: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
 module.exports = {
   getUserByEmail,
   getUserById,
@@ -375,4 +395,5 @@ module.exports = {
   computePointUser,
   computePoinLogsUser,
   findUserProfile,
+  statsAccountProvider,
 };

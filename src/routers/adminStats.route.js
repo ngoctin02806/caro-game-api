@@ -41,6 +41,30 @@ router.get(
   adminStatsController.statsTransactionsType
 );
 
+router.get(
+  '/admin-stats/users/stats-account-provider',
+  passport.authenticate('jwt', { session: false }),
+  adminStatsController.statsAccountProvider
+);
+
+// router.get(
+//   '/admin-stats/games/stats-games-by-day',
+//   passport.authenticate('jwt', { session: false }),
+//   adminStatsController.statsGamesByDay
+// );
+
+// router.get(
+//   '/admin-stats/games/top-users-play-most',
+//   passport.authenticate('jwt', { session: false }),
+//   adminStatsController.topUsersPlayMost
+// );
+
+// router.get(
+//   '/admin-stats/games/top-user-win-most',
+//   passport.authenticate('jwt', { session: false }),
+//   adminStatsController.topUserWinMost
+// );
+
 // Insert data:
 router.get(
   '/admin-stats/insert-data/transactionhistories',
