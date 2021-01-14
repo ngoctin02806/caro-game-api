@@ -1,6 +1,6 @@
 const transactionService = require('../services/transaction.service');
 const userService = require('../services/user.service');
-// const gameService = require('../services/game1.service');
+const gameService = require('../services/game1.service');
 
 const {
   transactionhistories,
@@ -264,44 +264,78 @@ module.exports.statsAccountProvider = async (req, res, next) => {
   }
 };
 
-// module.exports.statsGamesByDay = async (req, res, next) => {
-//   const startDate = startOfWeek(new Date());
+module.exports.statsGamesByDay = async (req, res, next) => {
+  const startDate = startOfWeek(new Date());
 
-//   try {
-//     const data = await gameService.countGamesByDay(startDate);
+  try {
+    const data = await gameService.countGamesByDay(startDate);
 
-//     if (data.value instanceof Error) throw data.value;
+    if (data.value instanceof Error) throw data.value;
 
-//     const formattedData = [];
-//     data.value.map(item =>
-//       formattedData.push({
-//         ...item._id, // eslint-disable-line
-//         count: item.count,
-//         str_day_week: numberToDayWeek(item._id.day_week), // eslint-disable-line
-//       })
-//     );
+    const formattedData = [];
+    data.value.map(item =>
+      formattedData.push({
+        ...item._id, // eslint-disable-line
+        count: item.count,
+        str_day_week: numberToDayWeek(item._id.day_week), // eslint-disable-line
+      })
+    );
 
-//     const lastDayWeek = formattedData[formattedData.length - 1].day_week;
-//     const result = [];
-//     // eslint-disable-next-line no-plusplus
-//     for (let i = 1, j = 0; i <= lastDayWeek; i++) {
-//       if (i === formattedData[j].day_week) {
-//         result.push(formattedData[j]);
-//         // eslint-disable-next-line no-plusplus
-//         j++;
-//       } else {
-//         result.push({
-//           day_week: i,
-//           count: 0,
-//           str_day_week: numberToDayWeek(i),
-//         });
-//       }
-//     }
+    const lastDayWeek = formattedData[formattedData.length - 1].day_week;
+    const result = [];
+    // eslint-disable-next-line no-plusplus
+    for (let i = 1, j = 0; i <= lastDayWeek; i++) {
+      if (i === formattedData[j].day_week) {
+        result.push(formattedData[j]);
+        // eslint-disable-next-line no-plusplus
+        j++;
+      } else {
+        result.push({
+          day_week: i,
+          count: 0,
+          str_day_week: numberToDayWeek(i),
+        });
+      }
+    }
 
-//     return res.status(200).json({ data: result });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
 
-// module.exports.topUsersPlayMost = async (req, res, next) => {};
+module.exports.topUsersPlayMost = async (req, res, next) => {
+  try {
+    const data = await gameService.topUsersPlayMost();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map((item, pos) =>
+      // eslint-disable-next-line no-underscore-dangle
+      result.push({ index: pos + 1, ...item._id[0], count: item.count })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.topUserWinMost = async (req, res, next) => {
+  try {
+    const data = await gameService.topUserWinMost();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map((item, pos) =>
+      // eslint-disable-next-line no-underscore-dangle
+      result.push({ index: pos + 1, username: item._id[0], count: item.count })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
