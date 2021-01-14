@@ -62,7 +62,7 @@ const initMoMoTransaction = async ({ userId, data, amount }) => {
           _id: generateSafeId(),
           status: 'WAITING',
           created_at: new Date().getTime(),
-          transaction_id: _.get(transaction, 'ops.0'),
+          transaction_id: _.get(transaction, 'ops.0._id'),
         },
         { session }
       );
