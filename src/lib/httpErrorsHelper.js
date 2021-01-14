@@ -98,4 +98,8 @@ module.exports = {
     new createError(400, 'room is not exist', {
       errors: [{ code: 7014, message: 'Room is not exist' }],
     }),
+  userIsBlocked: () =>
+    new createError(400, 'user is blocked account', {
+      errors: [{ code: 7015, message: 'User is blocked account' }],
+    }),
 };

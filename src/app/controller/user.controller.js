@@ -28,6 +28,9 @@ module.exports.login = async (req, res, next) => {
     if (!user.value)
       return res.status(400).json(httpErrorsHelper.userNotExist());
 
+    if (user.value.is_blocked)
+      return res.status(400).json(httpErrorsHelper.userIsBlocked());
+
     const comparePassword = await bcryptjsHelper.comparePassword(
       password,
       user.value.password
@@ -87,6 +90,7 @@ module.exports.register = async (req, res, next) => {
       verified_code: verifiedCode,
       role: USER_ROLE,
       provider: LOCAL_PROVIDER,
+      is_blocked: false,
     });
 
     if (newUser.value instanceof Error) throw newUser.value;
