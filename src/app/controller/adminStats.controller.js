@@ -1,4 +1,5 @@
 const transactionService = require('../services/transaction.service');
+const userService = require('../services/user.service');
 
 const {
   transactionhistories,
@@ -235,6 +236,24 @@ module.exports.statsTransactionsType = async (req, res, next) => {
     data.value.map(item =>
       // eslint-disable-next-line no-underscore-dangle
       result.push({ type: item._id.type, total_amount: item.total_amount })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.statsAccountProvider = async (req, res, next) => {
+  try {
+    const data = await userService.statsAccountProvider();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map(item =>
+      // eslint-disable-next-line no-underscore-dangle
+      result.push({ provider: item._id.provider, count: item.count })
     );
 
     return res.status(200).json({ data: result });

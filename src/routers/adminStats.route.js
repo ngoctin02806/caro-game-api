@@ -41,6 +41,12 @@ router.get(
   adminStatsController.statsTransactionsType
 );
 
+router.get(
+  '/admin-stats/users/stats-account-provider',
+  passport.authenticate('jwt', { session: false }),
+  adminStatsController.statsAccountProvider
+);
+
 // Insert data:
 router.get(
   '/admin-stats/insert-data/transactionhistories',
