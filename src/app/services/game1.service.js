@@ -338,7 +338,66 @@ const countGamesByDay = async startDate => {
   }
 };
 
-// const topUsersPlayMost = async () => {};
+const topUsersPlayMost = async () => {
+  const collection = mongo.db().collection(COLLECTION);
+  try {
+    const users = await collection
+      .aggregate([
+        {
+          $unwind: '$players',
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'players',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $project: {
+            'user.username': 1,
+          },
+        },
+        { $group: { _id: '$user', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(users));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+const topUserWinMost = async () => {
+  const collection = mongo.db().collection(COLLECTION);
+  try {
+    const users = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'winner_id',
+            foreignField: '_id',
+            as: 'winner',
+          },
+        },
+        {
+          $project: {
+            'winner.username': 1,
+          },
+        },
+        { $group: { _id: '$winner.username', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(users));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
 
 module.exports = {
   insertOne,
@@ -350,4 +409,6 @@ module.exports = {
   findOneGameIncludeInforUser,
   findAllMessages,
   countGamesByDay,
+  topUsersPlayMost,
+  topUserWinMost,
 };
