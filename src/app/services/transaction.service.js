@@ -188,7 +188,7 @@ const countSaleAmountByDay = async startDate => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
@@ -248,7 +248,7 @@ const countSaleAmountByWeek = async () => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
@@ -315,7 +315,7 @@ const countSaleAmountByMonth = async nowYear => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
@@ -389,7 +389,7 @@ const countSaleAmountByYear = async () => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
@@ -450,7 +450,7 @@ const topTopupUsers = async () => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
@@ -509,7 +509,7 @@ const statsTransactionsType = async () => {
       .aggregate([
         {
           $lookup: {
-            from: 'users',
+            from: 'transactions',
             localField: 'transaction_id',
             foreignField: '_id',
             as: 'transaction_id',
