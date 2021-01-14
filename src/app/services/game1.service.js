@@ -296,6 +296,50 @@ const findByUserId = async userId => {
   }
 };
 
+const countGamesByDay = async startDate => {
+  const collection = mongo.db().collection(COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $addFields: {
+            date: {
+              $toDate: '$created_at',
+            },
+          },
+        },
+        {
+          $match: {
+            created_at: { $gt: startDate },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              day_week: { $dayOfWeek: '$date' },
+            },
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+        {
+          $sort: {
+            '_id.day_week': 1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (error) {
+    return Promise.resolve(Result.Error(error));
+  }
+};
+
+// const topUsersPlayMost = async () => {};
+
 module.exports = {
   insertOne,
   updateGameWinner,
@@ -305,4 +349,5 @@ module.exports = {
   findOne,
   findOneGameIncludeInforUser,
   findAllMessages,
+  countGamesByDay,
 };

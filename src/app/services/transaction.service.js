@@ -187,6 +187,14 @@ const countSaleAmountByDay = async startDate => {
     const result = await collection
       .aggregate([
         {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
+        {
           $addFields: {
             date: {
               $toDate: '$created_at',
@@ -217,7 +225,7 @@ const countSaleAmountByDay = async startDate => {
         },
         {
           $sort: {
-            _id: 1,
+            '_id.day_week': 1,
           },
         },
       ])
@@ -238,6 +246,14 @@ const countSaleAmountByWeek = async () => {
   try {
     const result = await collection
       .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
         {
           $addFields: {
             date: {
@@ -297,6 +313,14 @@ const countSaleAmountByMonth = async nowYear => {
   try {
     const result = await collection
       .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
         {
           $addFields: {
             date: {
@@ -364,6 +388,14 @@ const countSaleAmountByYear = async () => {
     const result = await collection
       .aggregate([
         {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
+        {
           $addFields: {
             date: {
               $toDate: '$created_at',
@@ -419,6 +451,14 @@ const topTopupUsers = async () => {
         {
           $lookup: {
             from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
+        {
+          $lookup: {
+            from: 'users',
             localField: 'transaction_id.created_by',
             foreignField: '_id',
             as: 'created_by',
@@ -467,6 +507,14 @@ const statsTransactionsType = async () => {
   try {
     const result = await collection
       .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id',
+            foreignField: '_id',
+            as: 'transaction_id',
+          },
+        },
         {
           $project: {
             status: 1,
