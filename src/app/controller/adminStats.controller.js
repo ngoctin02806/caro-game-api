@@ -206,3 +206,39 @@ module.exports.countSaleAmountByYear = async (req, res, next) => {
     return next(error);
   }
 };
+
+module.exports.topTopupUsers = async (req, res, next) => {
+  try {
+    const data = await transactionService.topTopupUsers();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map(item =>
+      // eslint-disable-next-line no-underscore-dangle
+      result.push({ user: item._id.user[0], total_amount: item.total_amount })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+module.exports.statsTransactionsType = async (req, res, next) => {
+  try {
+    const data = await transactionService.statsTransactionsType();
+
+    if (data.value instanceof Error) throw data.value;
+
+    const result = [];
+    data.value.map(item =>
+      // eslint-disable-next-line no-underscore-dangle
+      result.push({ type: item._id.type, total_amount: item.total_amount })
+    );
+
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    return next(error);
+  }
+};

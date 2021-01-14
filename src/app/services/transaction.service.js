@@ -410,6 +410,92 @@ const countSaleAmountByYear = async () => {
   }
 };
 
+const topTopupUsers = async () => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'transaction_id.created_by',
+            foreignField: '_id',
+            as: 'created_by',
+          },
+        },
+        {
+          $project: {
+            status: 1,
+            created_by: 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+          },
+        },
+        {
+          $group: {
+            _id: { user: '$created_by.username' },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+        {
+          $limit: 10,
+        },
+        {
+          $sort: {
+            total_amount: -1,
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
+const statsTransactionsType = async () => {
+  const collection = mongo.db().collection(HIS_COLLECTION);
+
+  try {
+    const result = await collection
+      .aggregate([
+        {
+          $project: {
+            status: 1,
+            'transaction_id.type': 1,
+            'transaction_id.amount': 1,
+          },
+        },
+        {
+          $match: {
+            status: 'PAID',
+          },
+        },
+        {
+          $group: {
+            _id: { type: '$transaction_id.type' },
+            total_amount: {
+              $sum: '$transaction_id.amount',
+            },
+          },
+        },
+      ])
+      .toArray();
+
+    return Promise.resolve(Result.Ok(result));
+  } catch (err) {
+    return Promise.resolve(Result.Error(err));
+  }
+};
+
 module.exports = {
   findOne,
   topUpPoint,
@@ -421,4 +507,6 @@ module.exports = {
   countSaleAmountByWeek,
   countSaleAmountByMonth,
   countSaleAmountByYear,
+  topTopupUsers,
+  statsTransactionsType,
 };

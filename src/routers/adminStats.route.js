@@ -29,6 +29,18 @@ router.get(
   adminStatsController.countSaleAmountByYear
 );
 
+router.get(
+  '/admin-stats/transactions/top-topup-users',
+  passport.authenticate('jwt', { session: false }),
+  adminStatsController.topTopupUsers
+);
+
+router.get(
+  '/admin-stats/transactions/stats-transaction-type',
+  passport.authenticate('jwt', { session: false }),
+  adminStatsController.statsTransactionsType
+);
+
 // Insert data:
 router.get(
   '/admin-stats/insert-data/transactionhistories',
